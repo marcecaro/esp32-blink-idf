@@ -26,7 +26,9 @@ experimental = ["esp-idf-svc/experimental"]
 log = "0.4"
 anyhow = "1.0"
 esp-idf-svc = { version = "0.51", features = ["critical-section", "embassy-time-driver", "embassy-sync"] }
-esp-idf-hal = "0.45"
+esp-idf-hal = "0.45.2"
+i2c-character-display = "0.5.0"
+
 
 [build-dependencies]
 embuild = "0.33"
