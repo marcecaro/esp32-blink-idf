@@ -30,3 +30,5 @@ esp-idf-hal = "0.45"
 
 [build-dependencies]
 embuild = "0.33"
+cmake = "0.1"  
+
