@@ -21,7 +21,7 @@ MCU="esp32"
 # Use the correct esp-idf version
 ESP_IDF_VERSION = "v5.4.1"
 # Point to the local ESP-IDF path from the idf.env file
-ESP_IDF_PATH = { value = "/home/mcaro/workbench/esp32-blink-idf/.embuild/espressif/esp-idf/v5.4.1", relative = true }
+#ESP_IDF_PATH = { value = "/home/mcaro/workbench/esp32-blink-idf/.embuild/espressif/esp-idf/v5.4.1", relative = true }
 # Enable built libraries
 ESP_IDF_COMPONENTS_LINK_TYPE = "built"
 # Specify where components are built
