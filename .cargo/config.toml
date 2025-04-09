@@ -2,15 +2,28 @@
 target = "xtensa-esp32-espidf"
 
 [target.xtensa-esp32-espidf]
-linker = "ldproxy"
+# Use gcc directly instead of ldproxy to avoid configuration issues
+linker = "xtensa-esp32-elf-gcc"
 runner = "espflash flash --monitor"
-rustflags = [ "--cfg",  "espidf_time64"]
+rustflags = [
+  "--cfg", "espidf_time64",
+  "-C", "default-linker-libraries=y",
+  # Allow multiple definitions as ESP-IDF often has duplicate symbols
+  "-C", "link-arg=-Wl,--allow-multiple-definition"
+]
 
 [unstable]
 build-std = ["std", "panic_abort"]
 
 [env]
+# Specify the exact MCU variant
 MCU="esp32"
-# Note: this variable is not used by the pio builder (`cargo build --features pio`)
-ESP_IDF_VERSION = "v5.3.2"
+# Use the correct esp-idf version
+ESP_IDF_VERSION = "v5.4.1"
+# Point to the local ESP-IDF path from the idf.env file
+ESP_IDF_PATH = { value = "/home/mcaro/workbench/esp32-blink-idf/.embuild/espressif/esp-idf/v5.4.1", relative = true }
+# Enable built libraries
+ESP_IDF_COMPONENTS_LINK_TYPE = "built"
+# Specify where components are built
+ESP_IDF_COMPONENTS_BUILD_DIR = { value = "build", relative = true }
 

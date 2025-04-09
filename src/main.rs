@@ -16,6 +16,7 @@ fn main() -> anyhow::Result<()> {
     // Get access to the ESP32 peripherals
     let peripherals = Peripherals::take()?;
     
+    
     // The built-in LED on most ESP32 dev boards is connected to GPIO2
     let led_pin = peripherals.pins.gpio2;
     

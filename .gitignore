@@ -1,6 +1,10 @@
 
-/.embuild
-/target
-/Cargo.lock
-/build
- 
+.embuild
+target
+build
+
+
+# Component manager
+managed_components/
+
+

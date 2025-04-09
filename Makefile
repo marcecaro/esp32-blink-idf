@@ -8,10 +8,12 @@ clean:
 
 full-clean: clean
 	rm -rf managed_components
+	cargo clean
+	rm -rf target
 
-build:
+build-idf:
 	source ./project-export.sh && idf.py build
-	echo "Build completed."
+	echo "ESP-IDF Build completed."
 
 flash:
 	source ./project-export.sh && idf.py flash
@@ -31,5 +33,12 @@ find-arduino-h:
 
 find-arduino-cxx:
 	find ${ARDUINO_PACKAGES_PATH} -name '*.cpp' -o -name '*.c' | xargs dirname 2>/dev/null | sort | uniq
-	
-.PHONY: clean full-clean build flash monitor refresh-deps
+
+build-cargo:
+	cargo build
+
+build-all: build-idf build-cargo
+	echo "Build completed."
+
+.PHONY: build-idf build-cargo build-all flash monitor refresh-deps install-idf-tools find-arduino-h find-arduino-cxx clean full-clean
+
