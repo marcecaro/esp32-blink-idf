@@ -10,15 +10,6 @@ use std::io::{BufRead, BufReader, Write};
 fn main() {
     println!("cargo:warning=Building ESP32 project with C++ components");
     
-    // Run idf.py build first to ensure all C++ components are built
-    // println!("cargo:warning=Running idf.py build");
-    // let build_status = run_command_with_real_time_output("idf.py build");
-    
-    // if !build_status.success() {
-    //     panic!("idf.py build command failed with exit code: {:?}", build_status.code());
-    // }
-    // println!("cargo:warning=idf.py build completed successfully");
-    
     // Get current directory
     let current_dir = env::current_dir().expect("Failed to get current directory");
     
@@ -52,6 +43,7 @@ fn main() {
     println!("cargo:rerun-if-changed=sdkconfig");
     println!("cargo:rerun-if-changed=sdkconfig.defaults");
     println!("cargo:rerun-if-changed=components/");
+
 }
 
 

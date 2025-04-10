@@ -13,8 +13,12 @@ full-clean: clean
 	rm -rf build
 	rm -rf .embuild
 
+reconfigure-idf:
+	source ./project-export.sh && idf.py reconfigure && idf.py update-dependencies
+	echo "ESP-IDF Reconfigured."
+
 build-idf:
-	source ./project-export.sh && idf.py build
+	source ./project-export.sh && idf.py -v build 
 	echo "ESP-IDF Build completed."
 
 flash:
@@ -46,10 +50,11 @@ build-all: build-idf build-cargo
 
 bootstrap: full-clean
 	-unset IDF_PATH && cargo clean
-	cargo update
+	-cargo update
 	-unset IDF_PATH && cargo build
-	source idf.env && ${IDF_PATH}/install.sh 
-	cargo update
+	-source idf.env && ${IDF_PATH}/install.sh 
+	-cargo update
+	-cargo install bindgen-cli
 	@echo ""
 	@echo ""
 	@echo "Bootstrap completed."

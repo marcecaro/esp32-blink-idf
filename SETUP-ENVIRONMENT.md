@@ -1,3 +1,8 @@
+I have a esp32 CMakeLists build, that I want to run bindgen to generate rust bindings, Fot that I am collecting all the includes files that the project uses and try to use it to run bindgen, also i am running bindgen with target esp32 to avoid using the host headers.
+
+For some reson it is failing because of missing header files. 
+
+You can run it by: make build-idf
 
 # Layout
 
@@ -26,6 +31,7 @@ The project is structured as follows:
 
 # Setup environment
 
+sudo apt install clang
 
 Install:
     - ROS JAZZY
@@ -36,6 +42,7 @@ First run the setup script, to install the local ESP-IDF, to build the component
 ```bash
 make bootstrap
 ```
+Then open a new terminal.
 
 **bash.rc:**
 ```shell
@@ -65,14 +72,13 @@ install the dependencies:
 
 ```bash
 cargo update
+make refresh-idf-deps
 ```
 
 ### Add idf-dependencies
 
-```bash
-. project-export.sh && idf.py add-dependency "espressif/arduin
-o-esp32" 
-```
+In the component that needs the dependency, check the idf_component.yml file
+Run `make` to download the dependency
 
 ### Add cpp-dependencies
 
@@ -84,6 +90,13 @@ o-esp32"
 - Insatall the package there
 - is needed to add the idf dependency: espressif/arduino-esp32
 
+
+### Generates Binding From .h to rust
+
+```bash
+mkdir -p src/lx16a
+bindgen components/lx16a-servo/src/lx16a-servo.h -o src/lx16a/mod.rs
+```
 
 # Build
 
