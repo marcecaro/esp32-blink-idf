@@ -2,28 +2,16 @@
 target = "xtensa-esp32-espidf"
 
 [target.xtensa-esp32-espidf]
-#\
-# cc = "xtensa-esp32-elf-gcc"
-# cxx = "xtensa-esp32-elf-g++"
-# ar = "xtensa-esp32-elf-ar"
 linker = "ldproxy"
 runner = "espflash flash --monitor"
-#rustflags = ["-C", "link-arg=-Tbuild/esp-idf/esp32/esp32.project.ld"]
-
 
 [unstable]
 build-std = ["std", "panic_abort"]
 
 [env]
-# Specify the exact MCU variant
 MCU="esp32"
-# Use the correct esp-idf version
 ESP_IDF_VERSION = "v5.3.3"
-# Point to the local ESP-IDF path from the idf.env file
-#ESP_IDF_PATH = { value = "/home/mcaro/workbench/esp32-blink-idf/.embuild/espressif/esp-idf/v5.3.3", relative = true }
-# Enable built libraries
 ESP_IDF_COMPONENTS_LINK_TYPE = "built"
-# Specify where components are built
 ESP_IDF_COMPONENTS_BUILD_DIR = { value = "build", relative = true }
 AR_xtensa_esp32_espidf = "xtensa-esp32-elf-ar"
 CC_xtensa_esp32_espidf = "xtensa-esp32-elf-gcc"

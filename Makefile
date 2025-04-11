@@ -2,16 +2,23 @@
 SHELL := /bin/bash
 ARDUINO_PACKAGES_PATH := ~/workbench/arduino-packages
 
-clean:
+
+clean-idf:
+	-source ./project-export.sh && idf.py clean
+
+clean-idf-full:
 	-source ./project-export.sh && idf.py fullclean
 	rm -rf build
 
-full-clean: clean
+clean-cargo:
+	cargo clean
+
+clean-full-idf-cargo: clean-idf-full clean-cargo
 	rm -rf managed_components
-	-cargo clean
 	rm -rf target
 	rm -rf build
 	rm -rf .embuild
+
 
 reconfigure-idf:
 	source ./project-export.sh && idf.py reconfigure && idf.py update-dependencies
@@ -20,6 +27,9 @@ reconfigure-idf:
 build-idf:
 	source ./project-export.sh && idf.py -v build 
 	echo "ESP-IDF Build completed."
+
+build-cargo:
+	cargo build --target xtensa-esp32-espidf
 
 flash:
 	source ./project-export.sh && idf.py flash
@@ -36,14 +46,7 @@ install-idf-tools:
 	cargo update
 
 
-find-arduino-h:
-	find ${ARDUINO_PACKAGES_PATH} -name '*.h' | xargs dirname 2>/dev/null | sort | uniq
 
-find-arduino-cxx:
-	find ${ARDUINO_PACKAGES_PATH} -name '*.cpp' -o -name '*.c' | xargs dirname 2>/dev/null | sort | uniq
-
-build-cargo:
-	cargo build --target xtensa-esp32-espidf
 
 build-all: build-idf build-cargo
 	echo "Build completed."
