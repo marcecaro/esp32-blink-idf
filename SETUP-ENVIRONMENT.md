@@ -1,8 +1,4 @@
-I have a esp32 CMakeLists build, that I want to run bindgen to generate rust bindings, Fot that I am collecting all the includes files that the project uses and try to use it to run bindgen, also i am running bindgen with target esp32 to avoid using the host headers.
-
-For some reson it is failing because of missing header files. 
-
-You can run it by: make build-idf
+Based on: [ESP-IDF-TEMPLASTE](https://github.com/esp-rs/esp-idf-template/blob/master/README-cmake.md)
 
 # Layout
 

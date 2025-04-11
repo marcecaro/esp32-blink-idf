@@ -12,6 +12,8 @@ harness = false # do not use the built in cargo test harness -> resolve rust-ana
 
 [profile.release]
 opt-level = "s"
+lto = false
+
 
 [profile.dev]
 debug = true    # Symbols are nice and they don't increase the size on Flash
@@ -25,13 +27,18 @@ experimental = ["esp-idf-svc/experimental"]
 [dependencies]
 log = "0.4"
 anyhow = "1.0"
-esp-idf-svc = { version = "0.51", features = ["critical-section", "embassy-time-driver", "embassy-sync", "native", "alloc"] }
-esp-idf-hal = "0.45"
+# Use specific versions compatible with ESP-IDF v5.3.3
+# Let esp-idf-hal and esp-idf-svc pull in their required esp-idf-sys version
+esp-idf-hal = "0.45.2"
+esp-idf-svc = { version = "0.51.0", features = ["experimental", "alloc"] }
 cxx = "1.0"
 
+
 [build-dependencies]
-embuild = "0.33"
+embuild = { version = "0.33.0"}
 cmake = "0.1"
 libc = "0.2"
 cxx-build = "1.0"
+cc = "1.2.19"
+ldproxy = "0.3.4"
 
