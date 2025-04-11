@@ -1,43 +1,66 @@
 use std::thread;
 use std::time::Duration;
-use esp_idf_hal::gpio::PinDriver;
 use esp_idf_hal::peripherals::Peripherals;
-use esp32_blink_idf::lx16_aservo::ffi::hello;
+use esp_idf_svc::log::EspLogger;
+use esp32_blink_idf::lx16_aservo::ffi::{new_bus, new_servo};
 
 fn main() -> anyhow::Result<()> {
-    // It is necessary to call this function once. Otherwise some patches to the runtime
-    // implemented by esp-idf-sys might not link properly. See https://github.com/esp-rs/esp-idf-template/issues/71
+    // Initialize ESP-IDF
     esp_idf_svc::sys::link_patches();
-    hello(1);
-    // Bind the log crate to the ESP Logging facilities
-    esp_idf_svc::log::EspLogger::initialize_default();
-
-    log::info!("Starting LED blink loop...");
+    
+    // Initialize logger
+    EspLogger::initialize_default();
+    log::info!("Starting servo movement example...");
     
     // Get access to the ESP32 peripherals
-    let peripherals = Peripherals::take()?;
+    let _peripherals = Peripherals::take()?;
     
+    // Define the TX and RX pins for the servo bus
+    // Note: Use appropriate pin numbers for your hardware setup
+    let tx_pin: u8 = 17;  // GPIO 17 for TX
+    let rx_pin: u8 = 16;  // GPIO 16 for RX
     
-    // The built-in LED on most ESP32 dev boards is connected to GPIO2
-    let led_pin = peripherals.pins.gpio2;
+    // Create a new servo bus
+    log::info!("Creating servo bus on TX pin {} and RX pin {}", tx_pin, rx_pin);
+    let bus = new_bus(tx_pin, rx_pin);
     
-    // Create a pin driver for the LED pin in output mode
-    let mut led = PinDriver::output(led_pin)?;
+    // Create a new servo with ID 1
+    let servo_id: u8 = 1;
+    log::info!("Creating servo with ID {}", servo_id);
+    let servo = new_servo(&bus, servo_id);
     
-    // Create an infinite loop
+    // Initialize the servo
+    log::info!("Initializing servo...");
+    servo.initialize();
+    
+    // Set servo position limits (in 0.1 degrees)
+    // For example, from 0 to 240 degrees would be 0 to 2400 in centidegrees
+    servo.setLimitsTicks(0, 2400);
+    
+    log::info!("Starting servo movement loop...");
     let mut counter = 0;
     
+    // Move the servo back and forth in a loop
     loop {
-        // Toggle LED state
-
-        led.toggle()?;
-        log::info!("LED ON - Loop iteration: {}", counter);
+        // Move to minimum position (0 degrees)
+        log::info!("Moving to minimum position - iteration {}", counter);
+        servo.move_time(0, 1000);  // Move to 0 degrees over 1 second
+        thread::sleep(Duration::from_secs(2));  // Wait for movement to complete
+        
+        // Move to middle position (120 degrees)
+        log::info!("Moving to middle position - iteration {}", counter);
+        servo.move_time(1200, 1000);  // Move to 120 degrees over 1 second
+        thread::sleep(Duration::from_secs(2));  // Wait for movement to complete
+        
+        // Move to maximum position (240 degrees)
+        log::info!("Moving to maximum position - iteration {}", counter);
+        servo.move_time(2400, 1000);  // Move to 240 degrees over 1 second
+        thread::sleep(Duration::from_secs(2));  // Wait for movement to complete
         
         // Increment counter
         counter += 1;
         
-        // Delay for 1 second
-        thread::sleep(Duration::from_secs(1));
+        log::info!("Completed movement cycle {}", counter);
     }
     
     // This line is never reached due to the infinite loop
