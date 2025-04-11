@@ -43,7 +43,7 @@ find-arduino-cxx:
 	find ${ARDUINO_PACKAGES_PATH} -name '*.cpp' -o -name '*.c' | xargs dirname 2>/dev/null | sort | uniq
 
 build-cargo:
-	cargo build
+	cargo build --target xtensa-esp32-espidf
 
 build-all: build-idf build-cargo
 	echo "Build completed."

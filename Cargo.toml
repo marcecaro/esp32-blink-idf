@@ -40,5 +40,5 @@ cmake = "0.1"
 libc = "0.2"
 cxx-build = "1.0"
 cc = "1.2.19"
-ldproxy = "0.3.4"
+
 

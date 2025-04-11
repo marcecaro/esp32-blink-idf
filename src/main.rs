@@ -2,7 +2,7 @@ use std::thread;
 use std::time::Duration;
 use esp_idf_hal::gpio::PinDriver;
 use esp_idf_hal::peripherals::Peripherals;
-use esp32_blink_idf::LX16AServo::ffi::hello;
+use esp32_blink_idf::lx16_aservo::ffi::hello;
 
 fn main() -> anyhow::Result<()> {
     // It is necessary to call this function once. Otherwise some patches to the runtime
