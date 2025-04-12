@@ -1,69 +1,105 @@
 use std::thread;
 use std::time::Duration;
 use esp_idf_hal::peripherals::Peripherals;
+use esp_idf_hal::gpio;
+use esp_idf_hal::prelude::*; // This should include all required traits
 use esp_idf_svc::log::EspLogger;
-use esp32_blink_idf::lx16_aservo::ffi::{new_bus, new_servo};
-
-fn main() -> anyhow::Result<()> {
+//use esp32_blink_idf::lx16_aservo::ffi;
+use esp32_blink_idf::main_extern::ffi::hello;
+fn main()-> anyhow::Result<()> {
     // Initialize ESP-IDF
     esp_idf_svc::sys::link_patches();
     
     // Initialize logger
     EspLogger::initialize_default();
-    log::info!("Starting servo movement example...");
+    log::info!("Starting LED blink example on GPIO pin 2");
     
     // Get access to the ESP32 peripherals
-    let _peripherals = Peripherals::take()?;
+    let peripherals = Peripherals::take()?;
     
-    // Define the TX and RX pins for the servo bus
-    // Note: Use appropriate pin numbers for your hardware setup
-    let tx_pin: u8 = 17;  // GPIO 17 for TX
-    let rx_pin: u8 = 16;  // GPIO 16 for RX
+    // Configure GPIO pin 2 as output for LED control
+    let mut led = gpio::PinDriver::output(peripherals.pins.gpio2)?;
     
-    // Create a new servo bus
-    log::info!("Creating servo bus on TX pin {} and RX pin {}", tx_pin, rx_pin);
-    let bus = new_bus(tx_pin, rx_pin);
+    log::info!("LED blinking started. Press Ctrl+C to stop...");
     
-    // Create a new servo with ID 1
-    let servo_id: u8 = 1;
-    log::info!("Creating servo with ID {}", servo_id);
-    let servo = new_servo(&bus, servo_id);
-    
-    // Initialize the servo
-    log::info!("Initializing servo...");
-    servo.initialize();
-    
-    // Set servo position limits (in 0.1 degrees)
-    // For example, from 0 to 240 degrees would be 0 to 2400 in centidegrees
-    servo.setLimitsTicks(0, 2400);
-    
-    log::info!("Starting servo movement loop...");
-    let mut counter = 0;
-    
-    // Move the servo back and forth in a loop
+    // Blink the LED in an infinite loop
+    let mut count = 0;
     loop {
-        // Move to minimum position (0 degrees)
-        log::info!("Moving to minimum position - iteration {}", counter);
-        servo.move_time(0, 1000);  // Move to 0 degrees over 1 second
-        thread::sleep(Duration::from_secs(2));  // Wait for movement to complete
+        // Turn LED on
+        log::info!("LED ON {}", count);
+        led.set_high()?;
+        thread::sleep(Duration::from_millis(500)); // Wait for 500 milliseconds
         
-        // Move to middle position (120 degrees)
-        log::info!("Moving to middle position - iteration {}", counter);
-        servo.move_time(1200, 1000);  // Move to 120 degrees over 1 second
-        thread::sleep(Duration::from_secs(2));  // Wait for movement to complete
-        
-        // Move to maximum position (240 degrees)
-        log::info!("Moving to maximum position - iteration {}", counter);
-        servo.move_time(2400, 1000);  // Move to 240 degrees over 1 second
-        thread::sleep(Duration::from_secs(2));  // Wait for movement to complete
-        
-        // Increment counter
-        counter += 1;
-        
-        log::info!("Completed movement cycle {}", counter);
+        count =hello(count);
+        // Turn LED off
+        log::info!("LED OFF {}", count);
+        led.set_low()?;
+        thread::sleep(Duration::from_millis(500)); // Wait for 500 milliseconds
     }
     
     // This line is never reached due to the infinite loop
     #[allow(unreachable_code)]
     Ok(())
 }
+
+// fn main_servo() -> anyhow::Result<()> {
+//     // Initialize ESP-IDF
+//     esp_idf_svc::sys::link_patches();
+    
+//     // Initialize logger
+//     EspLogger::initialize_default();
+//     log::info!("Starting simple servo example");
+    
+//     // Get access to the ESP32 peripherals
+//     let _peripherals = Peripherals::take()?;
+    
+//     // Create a new servo bus
+//     log::info!("Creating servo bus");
+//     let mut bus = ffi::new_bus();
+    
+//     // Get serial port and initialize
+//     let serial = ffi::get_serial();
+//     serial.begin(115200);
+    
+//     // Initialize the servo bus with TX on pin 33 and flag on pin -1
+//     log::info!("Initializing servo bus");
+//     bus.as_mut().unwrap().begin(serial, 33, -1);
+    
+//     // Create a new servo with ID 1
+//     let servo_id: u8 = 1;
+//     log::info!("Creating servo with ID {}", servo_id);
+//     let mut servo = ffi::new_servo(bus.as_ref().unwrap(), servo_id);
+    
+//     // Initialize the servo
+//     log::info!("Initializing servo");
+//     servo.as_mut().unwrap().initialize();
+    
+//     log::info!("Starting servo movement loop");
+    
+//     // Simple back and forth movement
+//     loop {
+//         // Move to 0 degrees (minimum position)
+//         log::info!("Moving to 0 degrees");
+//         servo.as_mut().unwrap().move_time(0, 1000); // 1000ms movement time
+//         thread::sleep(Duration::from_millis(1500)); // Wait for movement
+        
+//         // Move to 90 degrees (middle position)
+//         log::info!("Moving to 90 degrees");
+//         servo.as_mut().unwrap().move_time(9000, 1000); // 90 degrees = 9000 centidegrees
+//         thread::sleep(Duration::from_millis(1500)); // Wait for movement
+        
+//         // Move to 180 degrees (maximum position)
+//         log::info!("Moving to 180 degrees");
+//         servo.as_mut().unwrap().move_time(18000, 1000); // 180 degrees = 18000 centidegrees
+//         thread::sleep(Duration::from_millis(1500)); // Wait for movement
+        
+//         // Print some servo information
+//         log::info!("Servo position: {}", servo.as_ref().unwrap().pos_read());
+//         log::info!("Servo voltage: {} mV", servo.as_ref().unwrap().vin());
+//         log::info!("Servo temperature: {}°C", servo.as_ref().unwrap().temp());
+//     }
+    
+//     // This line is never reached due to the infinite loop
+//     #[allow(unreachable_code)]
+//     Ok(())
+// }

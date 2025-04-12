@@ -32,11 +32,12 @@ build-cargo:
 	cargo build --target xtensa-esp32-espidf
 
 flash:
-	source ./project-export.sh && idf.py flash
+	cargo espflash flash
 	echo "Flash completed."
 
 monitor:
-	source ./project-export.sh && idf.py monitor
+	cargo espflash monitor
+	echo "Flash completed."
 	
 refresh-idf-deps:
 	source ./project-export.sh && idf.py reconfigure && idf.py update-dependencies
@@ -45,7 +46,8 @@ install-idf-tools:
 	source idf.env && ${IDF_PATH}/install.sh 
 	cargo update
 
-
+build: build-cargo
+	echo "Build cargo finished"
 
 
 build-all: build-idf build-cargo

@@ -11,8 +11,8 @@ set(PROJECT_DEPS    pthread
 
 
 idf_component_register(
-    SRCS "main.c"
+    SRCS "main.cpp"
     INCLUDE_DIRS "."
     PRIV_REQUIRES "${PROJECT_DEPS}"
-    #WHOLE_ARCHIVE TRUE
+    WHOLE_ARCHIVE TRUE
 )
