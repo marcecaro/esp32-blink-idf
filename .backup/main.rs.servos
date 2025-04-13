@@ -4,8 +4,8 @@ use esp_idf_hal::peripherals::Peripherals;
 use esp_idf_hal::gpio;
 use esp_idf_hal::prelude::*; // This should include all required traits
 use esp_idf_svc::log::EspLogger;
-//use esp32_blink_idf::lx16_aservo::ffi;
-use esp32_blink_idf::main_extern::ffi::hello;
+use esp32_blink_idf::lx16_aservo::ffi;
+
 fn main()-> anyhow::Result<()> {
     // Initialize ESP-IDF
     esp_idf_svc::sys::link_patches();
@@ -23,16 +23,14 @@ fn main()-> anyhow::Result<()> {
     log::info!("LED blinking started. Press Ctrl+C to stop...");
     
     // Blink the LED in an infinite loop
-    let mut count = 0;
     loop {
         // Turn LED on
-        log::info!("LED ON {}", count);
+        log::info!("LED ON");
         led.set_high()?;
         thread::sleep(Duration::from_millis(500)); // Wait for 500 milliseconds
         
-        count =hello(count);
         // Turn LED off
-        log::info!("LED OFF {}", count);
+        log::info!("LED OFF");
         led.set_low()?;
         thread::sleep(Duration::from_millis(500)); // Wait for 500 milliseconds
     }

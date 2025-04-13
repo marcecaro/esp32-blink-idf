@@ -1,6 +1,8 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 #set(VERBOSE 1)
 
+# Add the global linker flags before including the project
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--allow-multiple-definition")
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 

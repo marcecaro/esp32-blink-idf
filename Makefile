@@ -19,6 +19,9 @@ clean-full-idf-cargo: clean-idf-full clean-cargo
 	rm -rf build
 	rm -rf .embuild
 
+menuconfig-idf:
+	-source ./project-export.sh && idf.py menuconfig
+	echo "ESP-IDF Menuconfig completed."
 
 reconfigure-idf:
 	source ./project-export.sh && idf.py reconfigure && idf.py update-dependencies
@@ -32,11 +35,11 @@ build-cargo:
 	cargo build --target xtensa-esp32-espidf
 
 flash:
-	cargo espflash flash
+	idf.py flash
 	echo "Flash completed."
 
 monitor:
-	cargo espflash monitor
+	espflash monitor
 	echo "Flash completed."
 	
 refresh-idf-deps:
