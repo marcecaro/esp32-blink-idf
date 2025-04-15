@@ -3,7 +3,6 @@ use std::path::PathBuf;
 use std::fs;
 use std::path::Path;
 use std::collections::HashSet;
-use std::io::Write;
 
 /// Extract include paths from compile_commands.json specific to a component
 fn extract_include_paths(component_name: &str) -> Vec<String> {
@@ -47,10 +46,13 @@ fn extract_include_paths(component_name: &str) -> Vec<String> {
                     if part.starts_with("-I") {
                         // Handle -I/path/to/include format
                         let path = part.trim_start_matches("-I").to_string();
+                        println!("cargo:warning=Found component file: {}", &path);
                         include_paths.insert(path);
+                        
                     } else if *part == "-I" && i + 1 < parts.len() {
                         // Handle -I /path/to/include format
                         let path = parts[i + 1].to_string();
+                        println!("cargo:warning=Found component file: {}", &path);
                         include_paths.insert(path);
                     }
                 }
@@ -71,44 +73,6 @@ fn extract_include_paths(component_name: &str) -> Vec<String> {
     }
 
     // Add Arduino ESP32 specific include paths if they exist - required for components that use Arduino
-    let arduino_esp32_paths = [
-        "build/esp-idf/components/arduino-esp32/cores/esp32",
-        "build/esp-idf/components/arduino-esp32/variants/esp32",
-        "build/esp-idf/components/arduino-esp32/libraries",
-        "build/esp-idf/arduino_tinyusb/include",
-    ];
-
-    for path in arduino_esp32_paths.iter() {
-        if Path::new(path).exists() {
-            include_paths.insert(path.to_string());
-        }
-    }
-
-    // Add ESP-IDF config path which is always needed
-    let config_path = build_dir.join("config");
-    if config_path.exists() {
-        include_paths.insert(config_path.to_string_lossy().to_string());
-    }
-
-    // Get toolchain includes which are always needed
-    if let Ok(output) = std::process::Command::new("xtensa-esp32-elf-gcc")
-        .args(["-print-file-name=include"])
-        .output() {
-        if output.status.success() {
-            let toolchain_include = String::from_utf8_lossy(&output.stdout).trim().to_string();
-            if !toolchain_include.is_empty() {
-                include_paths.insert(toolchain_include);
-            }
-        }
-    }
-
-    // Add IDF_PATH/components which is often needed
-    if let Ok(idf_path) = env::var("IDF_PATH") {
-        let idf_components = PathBuf::from(idf_path).join("components");
-        if idf_components.exists() {
-            include_paths.insert(idf_components.to_string_lossy().to_string());
-        }
-    }
 
     println!("cargo:warning=Found {} include paths for component {}", include_paths.len(), component_name);
     include_paths.into_iter().collect()
@@ -143,13 +107,11 @@ fn generate_binding(
         "-std=c++14".to_string(),
         "--target=x86_64-linux".to_string(),
         "-DARDUINO_ARCH_ESP32".to_string(),
-        // Add definitions to handle missing system headers
-        "-D__MACHINE_ENDIAN_H__".to_string(),      // Skip machine/endian.h
-        "-D_ENDIAN_H".to_string(),                  // Skip endian.h if needed
-        "-D__BYTE_ORDER=1234".to_string(),         // Define byte order as little endian (common for ESP32)
-        "-D__LITTLE_ENDIAN=1234".to_string(),      // Define little endian macro
-        "-D__BIG_ENDIAN=4321".to_string(),         // Define big endian macro
     ];
+    
+    // // Add defines to silence some common errors
+    // clang_args.push("-DESP_PLATFORM".to_string());
+    // clang_args.push("-DIDF_VER=\"v5.3.3\"".to_string());
     
     // Add the include paths
     clang_args.extend(include_args);
@@ -192,6 +154,9 @@ fn generate_binding(
     println!("cargo:rustc-link-search=native=components/{}/build", component_name);
     println!("cargo:rustc-link-lib=static={}", component_name);
 }
+
+/// Discover ESP-IDF component include directories
+
 
 fn main() {
     // Tell Cargo to re-run build script if these files change
