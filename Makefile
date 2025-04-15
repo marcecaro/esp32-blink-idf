@@ -69,5 +69,9 @@ bootstrap: full-clean
 	@echo "Close and open a new terminal."
 	@echo ""
 
+extract-includes:
+	idf.py reconfigure
+	cmake -P extract_includes.cmake
+
 .PHONY: build-idf build-cargo build-all flash monitor refresh-deps install-idf-tools find-arduino-h find-arduino-cxx clean full-clean
 

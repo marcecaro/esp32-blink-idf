@@ -16,3 +16,4 @@ ESP_IDF_COMPONENTS_BUILD_DIR = { value = "build", relative = true }
 AR_xtensa_esp32_espidf = "xtensa-esp32-elf-ar"
 CC_xtensa_esp32_espidf = "xtensa-esp32-elf-gcc"
 CXX_xtensa_esp32_espidf = "xtensa-esp32-elf-g++"
+TARGET = "xtensa-esp32-elf"

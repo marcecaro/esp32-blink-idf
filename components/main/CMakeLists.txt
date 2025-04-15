@@ -6,6 +6,7 @@ set(PROJECT_DEPS    pthread
                     driver 
                     vfs
                     nvs_flash
+                    lx16a-servo
                     )
 
 
@@ -18,6 +19,17 @@ idf_component_register(
 
 # Get the directory of the Rust library
 set(RUST_LIB_DIR "${CMAKE_SOURCE_DIR}/target/xtensa-esp32-espidf/debug")
+set(RUST_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
+
+# Generate CXX bridge files path
+set(RUST_GENERATED_DIR "${CMAKE_BINARY_DIR}/rust_generated")
+file(MAKE_DIRECTORY ${RUST_GENERATED_DIR})
+
+# Copy generated CXX files from target directory (if they exist)
+file(GLOB RUST_GENERATED_FILES "${RUST_LIB_DIR}/build/*/src/lx16_aservo/mod.rs.cc")
+if(RUST_GENERATED_FILES)
+    file(COPY ${RUST_GENERATED_FILES} DESTINATION ${RUST_GENERATED_DIR})
+endif()
 
 # Link with Rust library
 target_link_libraries(${COMPONENT_LIB} "${RUST_LIB_DIR}/libesp32blinkirust.a")

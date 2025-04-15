@@ -1,3 +1,10 @@
+
 {
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "editor.suggest.showColors": true,
+    "workbench.colorCustomizations": {
+        "editorInlayHint.typeForeground": "#8f990ade",
+        "editorInlayHint.parameterForeground": "#8f990ade",
+        "editorInlayHint.fontStyle": "italic"
+    }
 }
