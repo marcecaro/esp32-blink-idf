@@ -4,15 +4,15 @@ use std::fs;
 use std::path::Path;
 use std::collections::HashSet;
 
-/// Extract include paths from compile_commands.json specific to a component
-fn extract_include_paths(component_name: &str) -> Vec<String> {
+/// Extract include paths and defines from compile_commands.json
+fn extract_include_paths(component_name: &str) -> (Vec<String>, Vec<String>) {
     let build_dir = PathBuf::from("build");
     let compile_commands_path = build_dir.join("compile_commands.json");
 
     // If compile_commands.json doesn't exist, we need to inform the user
     if !compile_commands_path.exists() {
         println!("cargo:warning=compile_commands.json not found. Run 'idf.py reconfigure' first to generate it.");
-        return vec![];
+        return (vec![], vec![]);
     }
 
     let contents = fs::read_to_string(&compile_commands_path)
@@ -22,60 +22,137 @@ fn extract_include_paths(component_name: &str) -> Vec<String> {
         .unwrap_or_else(|e| panic!("Failed to parse compile_commands.json: {}", e));
 
     let mut include_paths = HashSet::new();
+    let mut defines = HashSet::new();
     let component_path = format!("/components/{}/", component_name);
-    let component_path_alt = format!("/components/{}\\", component_name); // Windows-style path
-
-    // Handle both .c and .cpp files to get all possible include paths
+    
+    // Find a C++ file from our component and use its exact command line
+    // This ensures we get the right include paths and defines
     if let Some(commands_array) = commands.as_array() {
         for cmd in commands_array {
-            // Filter for files that belong to our component
+            // Check if this is a file from our component
             if let Some(file) = cmd.get("file").and_then(|f| f.as_str()) {
-                if !file.contains(&component_path) && !file.contains(&component_path_alt) {
-                    continue; // Skip files not belonging to our component
-                }
-                
-                println!("cargo:warning=Found component file: {}", file);
-            } else {
-                continue; // Skip entries without a file key
-            }
-
-            if let Some(command) = cmd.get("command").and_then(|c| c.as_str()) {
-                // Extract -I flags from the command
-                let parts: Vec<&str> = command.split_whitespace().collect();
-                for (i, part) in parts.iter().enumerate() {
-                    if part.starts_with("-I") {
-                        // Handle -I/path/to/include format
-                        let path = part.trim_start_matches("-I").to_string();
-                        println!("cargo:warning=Found component file: {}", &path);
-                        include_paths.insert(path);
+                if file.contains(&component_path) && file.ends_with(".cpp") {
+                    // We found a C++ file from our component, use its exact command line
+                    if let Some(command) = cmd.get("command").and_then(|c| c.as_str()) {
+                        println!("cargo:warning=Found command for our component: {}", file);
+                        println!("cargo:warning=Command: {}", command.replace("\n", " "));
                         
-                    } else if *part == "-I" && i + 1 < parts.len() {
-                        // Handle -I /path/to/include format
-                        let path = parts[i + 1].to_string();
-                        println!("cargo:warning=Found component file: {}", &path);
-                        include_paths.insert(path);
+                        // Extract all flags (-I and -D) from the command
+                        let parts: Vec<&str> = command.split_whitespace().collect();
+                        for (i, part) in parts.iter().enumerate() {
+                            // Handle include paths (-I flags)
+                            if part.starts_with("-I") && part.len() > 2 {
+                                // Handle -I/path/to/include format (no space after -I)
+                                let path = part[2..].to_string();
+                                include_paths.insert(path.clone());
+                                
+                            } else if *part == "-I" && i + 1 < parts.len() {
+                                // Handle -I /path/to/include format (space after -I)
+                                let path = parts[i + 1].to_string();
+                                include_paths.insert(path.clone());
+                            }
+                            
+                            // Handle define flags (-D flags)
+                            else if part.starts_with("-D") && part.len() > 2 {
+                                // Handle -DFLAG=value format (no space after -D)
+                                let mut define = part[2..].to_string();
+                                // Fix escaped quotes in defines
+                                define = define.replace("\\\"", "\""); // Convert \" to "
+                                defines.insert(define.clone());
+                                
+                            } else if *part == "-D" && i + 1 < parts.len() {
+                                // Handle -D FLAG=value format (space after -D)
+                                let mut define = parts[i + 1].to_string();
+                                // Fix escaped quotes in defines
+                                define = define.replace("\\\"", "\""); // Convert \" to "
+                                defines.insert(define.clone());
+                            }
+                        }
+                        
+                        // Once we find one C++ file from our component, that's enough
+                        break;
                     }
                 }
             }
         }
     }
-
-    // Always add this component's specific paths
-    let component_src_path = PathBuf::from("components").join(component_name).join("src");
-    let component_include_path = PathBuf::from("components").join(component_name).join("include");
     
-    if component_src_path.exists() {
-        include_paths.insert(component_src_path.to_string_lossy().to_string());
+    // If we didn't find a specific command for our component, scan all commands
+    if include_paths.is_empty() {
+        println!("cargo:warning=No specific C++ file found for component, scanning all commands...");
+        if let Some(commands_array) = commands.as_array() {
+            for cmd in commands_array {
+                // Get the command string
+                if let Some(command) = cmd.get("command").and_then(|c| c.as_str()) {
+                    // Check if this is a relevant command (C/C++ compilation)
+                    if !command.contains("-c ") && !command.contains("-E ") {
+                        continue;
+                    }
+                    
+                    // Extract all flags (-I and -D) from the command
+                    let parts: Vec<&str> = command.split_whitespace().collect();
+                    for (i, part) in parts.iter().enumerate() {
+                        // Handle include paths (-I flags)
+                        if part.starts_with("-I") && part.len() > 2 {
+                            // Handle -I/path/to/include format (no space after -I)
+                            let path = part[2..].to_string();
+                            include_paths.insert(path.clone());
+                            
+                        } else if *part == "-I" && i + 1 < parts.len() {
+                            // Handle -I /path/to/include format (space after -I)
+                            let path = parts[i + 1].to_string();
+                            include_paths.insert(path.clone());
+                        }
+                        
+                        // Handle define flags (-D flags)
+                        else if part.starts_with("-D") && part.len() > 2 {
+                            // Handle -DFLAG=value format (no space after -D)
+                            let mut define = part[2..].to_string();
+                            // Fix escaped quotes in defines
+                            define = define.replace("\\\"", "\""); // Convert \" to "
+                            defines.insert(define.clone());
+                            
+                        } else if *part == "-D" && i + 1 < parts.len() {
+                            // Handle -D FLAG=value format (space after -D)
+                            let mut define = parts[i + 1].to_string();
+                            // Fix escaped quotes in defines
+                            define = define.replace("\\\"", "\""); // Convert \" to "
+                            defines.insert(define.clone());
+                        }
+                    }
+                }
+            }
+        }
     }
     
-    if component_include_path.exists() {
-        include_paths.insert(component_include_path.to_string_lossy().to_string());
+    // Print a sample of what we found
+    println!("cargo:warning=Found {} include paths", include_paths.len());
+    let mut include_vec: Vec<String> = include_paths.iter().take(5).cloned().collect();
+    println!("cargo:warning=Sample of include paths: {:?}", include_vec);
+    
+    println!("cargo:warning=Found {} defines", defines.len());
+    let mut defines_vec: Vec<String> = defines.iter().take(5).cloned().collect();
+    println!("cargo:warning=Sample of defines: {:?}", defines_vec);
+    
+    // Make sure we have the component's include directory
+    let component_include = format!("components/{}/src", component_name);
+    if !include_paths.contains(&component_include) {
+        println!("cargo:warning=Adding component src directory: {}", component_include);
+        include_paths.insert(component_include);
     }
 
-    // Add Arduino ESP32 specific include paths if they exist - required for components that use Arduino
-
-    println!("cargo:warning=Found {} include paths for component {}", include_paths.len(), component_name);
-    include_paths.into_iter().collect()
+    println!("cargo:warning=Found {} include paths and {} defines for component {}", 
+        include_paths.len(), defines.len(), component_name);
+    
+    // Print the first few defines to help with debugging
+    let mut defines_vec: Vec<String> = defines.into_iter().collect();
+    if !defines_vec.is_empty() {
+        defines_vec.sort();
+        println!("cargo:warning=Sample of defines: {:?}", 
+            &defines_vec.iter().take(5).collect::<Vec<_>>());
+    }
+    
+    (include_paths.into_iter().collect(), defines_vec)
 }
 
 
@@ -91,13 +168,19 @@ fn generate_binding(
     // Get the output directory
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
     
-    // Get include paths from compile_commands.json for the component
-    let include_paths = extract_include_paths(component_name);
+    // Get include paths and defines from compile_commands.json for the component
+    let (include_paths, defines) = extract_include_paths(component_name);
     
-    // Convert include paths to clang args (i.e., -I<path>)
+    // Convert include paths to clang args
     let include_args: Vec<String> = include_paths
         .into_iter()
         .map(|path| format!("-I{}", path))
+        .collect();
+
+    // Convert defines to clang args
+    let define_args: Vec<String> = defines
+        .into_iter()
+        .map(|def| format!("-D{}", def))
         .collect();
 
     // Start with basic args for C++ compilation
@@ -106,15 +189,14 @@ fn generate_binding(
         "c++".to_string(), 
         "-std=c++14".to_string(),
         "--target=x86_64-linux".to_string(),
-        "-DARDUINO_ARCH_ESP32".to_string(),
     ];
     
-    // // Add defines to silence some common errors
-    // clang_args.push("-DESP_PLATFORM".to_string());
-    // clang_args.push("-DIDF_VER=\"v5.3.3\"".to_string());
-    
-    // Add the include paths
+    // Add the rest of the include paths and defines
     clang_args.extend(include_args);
+    clang_args.extend(define_args);
+    
+    // Print actual command for debugging
+    println!("cargo:warning=Actual command: clang {} -E -", clang_args.join(" "));
     
     // Start building the bindgen configuration
     let mut builder = bindgen::Builder::default();
