@@ -6,5 +6,8 @@
         "editorInlayHint.typeForeground": "#8f990ade",
         "editorInlayHint.parameterForeground": "#8f990ade",
         "editorInlayHint.fontStyle": "italic"
+    },
+    "files.associations": {
+        "_types.h": "c"
     }
 }
