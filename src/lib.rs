@@ -1,14 +1,17 @@
-pub mod lx16_aservo;
 pub mod main_extern;
+// Import the auto-generated bindings
+mod lx16a_servo;
 
 use log::{info, error};
 use esp_idf_hal::gpio::{Gpio2, PinDriver, Output};
 use esp_idf_hal::delay::FreeRtos;
 use esp_idf_svc::log::EspLogger;
 use main_extern::hello;
+use std::ptr;
+use std::mem;
 
-// Import our safe wrapper types
-use lx16_aservo::{Bus, Servo};
+// Use the bindings from the auto-generated file
+use lx16a_servo::root::{LX16ABus, LX16AServo, HardwareSerial};
 
 // Main entry point called from C
 #[no_mangle]
@@ -21,119 +24,62 @@ pub extern "C" fn rust_main() {
     // Initialize LX16A servo components
     info!("Initializing servo components");
     
-    // Create the bus and servo with safe Rust wrappers
-    // These handle all the unsafe FFI calls internally and provide proper error handling
-    let bus = match Bus::new(1, 2) {
-        Ok(bus) => {
-            info!("Successfully created servo bus");
-            bus
-        },
-        Err(e) => {
-            error!("Failed to create servo bus: {:?}", e);
-            return;
-        }
+    // Create the LX16ABus instance
+    // Safety: We're calling into C++ code but managing the lifetime in Rust
+    let mut bus = unsafe {
+        let bus = LX16ABus::new();
+        info!("Successfully created servo bus");
+        bus
     };
     
-    // Enable debug output
-    bus.debug(true);
-    
-    // Create and initialize the servo
-    let servo = match bus.create_servo(1) {
-        Ok(servo) => {
-            info!("Successfully created servo");
-            servo
-        },
-        Err(e) => {
-            error!("Failed to create servo: {:?}", e);
-            return;
-        }
+    // Create a servo on the bus with ID 1
+    // Safety: We're working with raw pointers to the bus and creating a servo instance
+    let mut servo = unsafe {
+        // Get a raw pointer to the bus
+        let bus_ptr: *mut LX16ABus = &mut bus;
+        
+        // Create the servo with ID 1
+        let mut servo = LX16AServo::new(bus_ptr, 1);
+        info!("Successfully created servo with ID 1");
+        
+        // Initialize the servo
+        servo.initialize();
+        servo
     };
     
-    // Enable the servo and move to initial position
-    servo.enable();
-    if let Err(e) = servo.move_time(500, 1000) { // Move to position 500 over 1 second
-        error!("Failed to move servo: {:?}", e);
-    }
+    // Initialize GPIO for the LED
+    let mut led = PinDriver::output(unsafe { Gpio2::new() }).unwrap();
+    let mut led_state = false;
     
-    info!("Servo components initialized");
-    
-    // Set up the GPIO pin for the LED (usually GPIO2 on most ESP32 dev boards)
-    let led = unsafe { Gpio2::new() };
-    let mut led_driver = PinDriver::output(led).unwrap();
-    
-    info!("LED pin configured, starting main loop");
-    
-    // Main application loop that blinks the LED and controls the servo
-    let mut count = 0;
-    let mut servo_angle = 0;
-    let divisor = 4;
-    
+    // Main loop
+    info!("Entering main loop");
     loop {
         // Toggle the LED
-        led_driver.set_high().unwrap();
-        info!("LED ON (iteration {})", count);
-        
-        // Read the current servo position with proper error handling
-        match servo.pos_read() {
-            Ok(pos) => info!("Servo position: {}", pos),
-            Err(e) => error!("Failed to read servo position: {:?}", e)
-        };
-        
-        // Move the servo to a new position with proper error handling
-        if let Err(e) = servo.move_time(servo_angle, 10 * divisor as u16) {
-            error!("Failed to move servo: {:?}", e);
+        led_state = !led_state;
+        if led_state {
+            led.set_high().unwrap();
         } else {
-            info!("Moving servo to angle: {} (time: {}ms)", servo_angle, 10 * divisor);
+            led.set_low().unwrap();
         }
         
-        // Read and display servo information with proper error handling
-        if let Ok(voltage) = servo.vin() {
-            info!("Servo voltage: {}", voltage);
-        }
-        
-        if let Ok(temp) = servo.temp() {
-            info!("Servo temperature: {}", temp);
-        }
-        
-        if let Ok(id) = servo.id_read() {
-            info!("Servo ID: {}", id);
-        }
-        
-        if let Ok(is_motor_mode) = servo.is_motor_mode() {
-            info!("Servo motor mode: {}", is_motor_mode);
-        }
-        
-        // Wait for the movement to complete
-        FreeRtos::delay_ms(10 * divisor as u32);
-        
-        // Toggle the LED
-        led_driver.set_low().unwrap();
-        info!("LED OFF (iteration {})", unsafe { hello(count) });
-        
-        // Wait another half second
-        FreeRtos::delay_ms(500);
-        
-        // Update angle for next iteration (0-24000 in steps, similar to C++ example)
-        servo_angle = (servo_angle + 24 * divisor) % 24000;
-        
-        // Every 1000 iterations, move servo back to 0
-        if count % 40 == 39 {
-            info!("Resetting servo to position 0");
-            unsafe { 
-                // Store the servo pointer for later use if needed
-                lx16_aservo::SERVO_PTR = servo.as_ptr();
-                // Call the C++ function directly
-                lx16_aservo::LX16AServo_move_time(lx16_aservo::SERVO_PTR, 0, 3000);
+        // Call our C function and move the servo with proper unsafe boundaries
+        unsafe {
+            // Call our C hello function
+            let _ = hello(4);
+            
+            // Move the servo - using direct FFI calls to the generated bindings
+            if led_state {
+                // Move to 50 degrees (5000 centidegrees) over 1 second (1000ms)
+                servo.move_time(5000, 1000);
+                info!("Moved servo to 50 degrees");
+            } else {
+                // Move to 0 degrees over 1 second
+                servo.move_time(0, 1000);
+                info!("Moved servo to 0 degrees");
             }
-            FreeRtos::delay_ms(3000);
-            servo_angle = 0;
         }
         
-        // Increment the counter
-        count += 1;
+        // Delay for 2 seconds
+        FreeRtos::delay_ms(2000);
     }
-    
-    // Resources will be automatically cleaned up when they go out of scope
-    // The Bus and Servo structs implement Drop trait to safely free C++ resources
-    // This code is never reached due to the infinite loop, but is good practice
 }

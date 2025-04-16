@@ -26,7 +26,7 @@ fn generate_bindings(component_name: String) {
     let project_path = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let component_path = project_path.join("components").join(&component_name);
     let output_mod_path = project_path.join("src");
-    let output_mod_path_file = output_mod_path.join(&format!("{}.rs", component_name));
+    let output_mod_path_file = output_mod_path.join(&format!("{}.rs", component_name.replace("-", "_")));
 
     
     // Build bindgen configuration with minimal flags
@@ -48,9 +48,9 @@ fn generate_bindings(component_name: String) {
     let system_flags = get_system_flags();
     clang_args.extend(system_flags);
     
-    for arg in &clang_args {
-        println!("cargo:warning=Using clang arg: {}", arg);
-    }
+    // for arg in &clang_args {
+    //     println!("cargo:warning=Using clang arg: {}", arg);
+    // }
 
     let ffi_name = component_path.join("src/ffi.h");   
 
@@ -64,6 +64,11 @@ fn generate_bindings(component_name: String) {
         .header(ffi_name.to_str().unwrap())
         .enable_cxx_namespaces()
         .allowlist_type("LX16AServo")
+        .allowlist_type("LX16ABus")
+        // Disable layout tests to avoid size validation issues
+        .layout_tests(false)
+        .derive_debug(true)
+        .derive_default(true)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         .clang_args(clang_args);
     

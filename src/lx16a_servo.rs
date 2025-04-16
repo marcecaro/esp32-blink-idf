@@ -10,15 +10,10 @@ pub mod root {
         _unused: [u8; 0],
     }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Default, Copy, Clone)]
     pub struct LX16ABus {
         pub _address: u8,
     }
-    #[allow(clippy::unnecessary_operation, clippy::identity_op)]
-    const _: () = {
-        ["Size of LX16ABus"][::std::mem::size_of::<LX16ABus>() - 1usize];
-        ["Alignment of LX16ABus"][::std::mem::align_of::<LX16ABus>() - 1usize];
-    };
     unsafe extern "C" {
         #[link_name = "\u{1}_ZN8LX16ABus5debugEb"]
         pub fn LX16ABus_debug(this: *mut root::LX16ABus, on: bool);
@@ -274,25 +269,14 @@ pub mod root {
         }
     }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Default, Copy, Clone)]
     pub struct LX16AServo {
         pub staticOffset: i32,
         pub maxCentDegrees: i32,
         pub minCentDegrees: i32,
         pub _id: u8,
+        pub _reserved: [u8; 32usize],
     }
-    #[allow(clippy::unnecessary_operation, clippy::identity_op)]
-    const _: () = {
-        ["Size of LX16AServo"][::std::mem::size_of::<LX16AServo>() - 32usize];
-        ["Alignment of LX16AServo"][::std::mem::align_of::<LX16AServo>() - 8usize];
-        ["Offset of field: LX16AServo::staticOffset"]
-            [::std::mem::offset_of!(LX16AServo, staticOffset) - 0usize];
-        ["Offset of field: LX16AServo::maxCentDegrees"]
-            [::std::mem::offset_of!(LX16AServo, maxCentDegrees) - 8usize];
-        ["Offset of field: LX16AServo::minCentDegrees"]
-            [::std::mem::offset_of!(LX16AServo, minCentDegrees) - 16usize];
-        ["Offset of field: LX16AServo::_id"][::std::mem::offset_of!(LX16AServo, _id) - 24usize];
-    };
     unsafe extern "C" {
         #[link_name = "\u{1}_ZN10LX16AServo10initializeEv"]
         pub fn LX16AServo_initialize(this: *mut root::LX16AServo);

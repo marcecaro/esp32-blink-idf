@@ -78,6 +78,11 @@ public:
     int32_t minCentDegrees;
     uint8_t _id;
     
+    // Reserved space to ensure the size matches the C++ implementation
+    // The actual class has more private fields (like _bus pointer)
+    // C++ implementation is 48 bytes total, our public fields take up 16 bytes (4x int32 + 1x uint8)
+    uint8_t _reserved[32];
+    
     // Constructor and initialization
     LX16AServo(LX16ABus* bus, int id);
     void initialize();
