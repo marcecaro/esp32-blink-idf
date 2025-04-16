@@ -27,7 +27,7 @@ experimental = ["esp-idf-svc/experimental"]
 [dependencies]
 log = "0.4"
 anyhow = "1.0"
-# Use specific versions compatible with ESP-IDF v5.3.3
+# Use specific versions compatible with ESP-IDF v5.4.1
 # Let esp-idf-hal and esp-idf-svc pull in their required esp-idf-sys version
 esp-idf-sys = { version = "0.36.1", features = ["native"] }
 esp-idf-hal = "0.45.2"
