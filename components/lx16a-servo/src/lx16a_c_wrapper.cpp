@@ -4,8 +4,12 @@
 struct LX16ABusHandle   { LX16ABus   impl; };
 struct LX16AServoHandle { LX16AServo impl; };
 
+HardwareSerial *getSerial1() {
+    return &Serial1;
+}
+
 /* ---------- bus ---------- */
-LX16ABusHandle *lx16a_bus_create(void    *serial,
+LX16ABusHandle *lx16a_bus_create(HardwareSerial *serial,
                                  uint32_t baud,
                                  int      tx_pin,
                                  int      tx_flag_gpio)
@@ -23,8 +27,7 @@ void lx16a_bus_set_retries(LX16ABusHandle *h, uint8_t n){ h->impl.setRetryCount(
 void lx16a_bus_disable_all(LX16ABusHandle *h)           { h->impl.disableAll(); }
 uint32_t lx16a_bus_time_ms(LX16ABusHandle *h, uint32_t n){ return h->impl.time(n); }
 uint32_t lx16a_bus_time_us(LX16ABusHandle *h, uint32_t n){ return h->impl.timeus(n); }
-bool lx16a_bus_write(LX16ABusHandle *h,const uint8_t *b,uint32_t l){return h->impl.write(b,l);}
-int  lx16a_bus_read (LX16ABusHandle *h,uint8_t *b,uint32_t l)      {return h->impl.read (b,l);}
+
 
 /* ---------- servo ---------- */
 LX16AServoHandle *lx16a_servo_create(LX16ABusHandle *bus, uint8_t id)
@@ -36,7 +39,6 @@ LX16AServoHandle *lx16a_servo_create(LX16ABusHandle *bus, uint8_t id)
 }
 void lx16a_servo_destroy(LX16AServoHandle *s)           { delete s; }
 
-bool    lx16a_servo_move_time (LX16AServoHandle *s, int32_t cd, uint16_t ms){return s->impl.move_time(cd,ms);}
 int32_t lx16a_servo_pos_read  (LX16AServoHandle *s)                        {return s->impl.pos_read();}
 int32_t lx16a_servo_pos_cached(LX16AServoHandle *s)                        {return s->impl.pos_read_cached();}
 
@@ -49,9 +51,47 @@ bool lx16a_servo_calibrate(LX16AServoHandle *s,
                            int32_t cur,int32_t lo,int32_t hi)
 { return s->impl.calibrate(cur,lo,hi); }
 
-void lx16a_servo_set_id    (LX16AServoHandle *s, uint8_t id)  { s->impl.set_id(id); }
-void lx16a_servo_motor_mode(LX16AServoHandle *s, bool en)     { s->impl.setMotorMode(en); }
-void lx16a_servo_load      (LX16AServoHandle *s, bool en)     { s->impl.load_or_unload(en); }
 
 bool    lx16a_servo_cmd_ok     (LX16AServoHandle *s)          { return s->impl.isCommandOk(); }
-int32_t lx16a_servo_temperature(LX16AServoHandle *s)          { return s->impl.temp_read(); }
+int32_t lx16a_servo_temperature(LX16AServoHandle *s)          { return s->impl.temp(); }
+
+
+
+
+/* ---------- bus helpers ---------- */
+bool lx16a_bus_write(LX16ABusHandle *h,
+    uint8_t         cmd,
+    const uint8_t  *params,
+    int             cnt,
+    uint8_t         id)
+{
+return h->impl.write(cmd, params, cnt, id);
+}
+
+bool lx16a_bus_read(LX16ABusHandle *h,
+   uint8_t         cmd,
+   uint8_t        *params,
+   int             len,
+   uint8_t         id)
+{
+return h->impl.read(cmd, params, len, id);
+}
+
+/* ---------- servo motion ---------- */
+void lx16a_servo_move_time(LX16AServoHandle *s,
+          int32_t          cent_deg,
+          uint16_t         time_ms)
+{
+s->impl.move_time(cent_deg, time_ms);
+}
+
+/* ---------- misc helpers ---------- */
+void lx16a_servo_set_id(LX16AServoHandle *s, uint8_t id)
+{
+s->impl.id_write(id);
+}
+
+void lx16a_servo_motor_mode(LX16AServoHandle *s, int16_t speed)
+{
+s->impl.motor_mode(speed);
+}

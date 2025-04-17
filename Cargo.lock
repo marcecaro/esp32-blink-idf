@@ -468,8 +468,7 @@ dependencies = [
 [[package]]
 name = "embuild"
 version = "0.33.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28a8cbd9507fabce8f2741b9ca45da9e898cc2b0f1c2e53d21cb2436aeac811d"
+source = "git+https://github.com/esp-rs/embuild?branch=master#c7ce646977e4bbf9af50b802f88a63cc18cce72b"
 dependencies = [
  "anyhow",
  "bindgen",
@@ -539,8 +538,7 @@ dependencies = [
 [[package]]
 name = "esp-idf-hal"
 version = "0.45.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "775ce25171dc4f615146a4a27ed3a64c6fd99ced77d7112062f2b19bf933f5db"
+source = "git+https://github.com/esp-rs/esp-idf-hal?branch=master#26a598e21b2853bbdd35ea4c23cee1fcef628a06"
 dependencies = [
  "atomic-waker",
  "embassy-sync",
@@ -563,8 +561,7 @@ dependencies = [
 [[package]]
 name = "esp-idf-svc"
 version = "0.51.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2bc07aaba257d28d54a96af005ca67d0b38876d8837f5d54a3e0547e100b219c"
+source = "git+https://github.com/esp-rs/esp-idf-svc?branch=master#65fdf52c09aa8516d3198813d2a311071a344624"
 dependencies = [
  "embassy-futures",
  "embedded-hal-async",
@@ -582,8 +579,7 @@ dependencies = [
 [[package]]
 name = "esp-idf-sys"
 version = "0.36.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb77a3d02b579a60a811ed9be22b78c5e794bc492d833ee7fc44d3a0155885e1"
+source = "git+https://github.com/esp-rs/esp-idf-sys?branch=master#eb7eb59ae7fde43547468f3ce9cb5c99952428d5"
 dependencies = [
  "anyhow",
  "build-time",
@@ -604,6 +600,7 @@ name = "esp32-blink-idf"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bindgen",
  "embuild",
  "esp-idf-hal",
  "esp-idf-svc",

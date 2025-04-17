@@ -10,7 +10,7 @@ set(PROJECT_DEPS    pthread
 
 # Add our implementation files to the sources
 idf_component_register(
-    SRCS "src/lx16a-servo.cpp"
+    SRCS "src/lx16a-servo.cpp" "src/lx16a_c_wrapper.cpp"
     INCLUDE_DIRS "src"
     PRIV_REQUIRES "${PROJECT_DEPS}"
     WHOLE_ARCHIVE TRUE
