@@ -17,10 +17,10 @@ fn main() -> anyhow::Result<()> {
     EspLogger::initialize_default();
 
     info!("ESP32 LX16A Servo Example Starting...");
-    
     // Get Serial1 for servo communication
     let serial = unsafe { lx16a::getSerial2() };
-    
+    let serial_base = unsafe { lx16a::getSerial() };
+
     // Create the servo bus - equivalent to servoBus.begin(&Serial1, 1, 2)
     let servo_bus = ServoBus::new(serial, 33, -1);
     servo_bus.debug(true);
@@ -29,8 +29,9 @@ fn main() -> anyhow::Result<()> {
     let servo = Servo::new(&servo_bus, 1);
     
     // Main application loop
-    info!("Beginning Servo Example");
     
+    serial_base.begin(115200);
+    info!("Initialized");
     loop {
         let divisor = 4;
         

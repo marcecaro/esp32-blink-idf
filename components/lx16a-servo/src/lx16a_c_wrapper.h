@@ -16,7 +16,6 @@ extern "C" {
 /* ---------- opaque handles ---------- */
 typedef struct LX16ABusHandle   LX16ABusHandle;
 typedef struct LX16AServoHandle LX16AServoHandle;
-
 typedef struct HardwareSerial HardwareSerial;
 
 HardwareSerial *GetSerial();
@@ -27,6 +26,7 @@ HardwareSerial *getSerial2();
 
 
 void HardwareSerial_begin(HardwareSerial *, uint32_t baud);
+void HardwareSerial_end(HardwareSerial *);
 
 /* ---------- bus life‑cycle ---------- */
 LX16ABusHandle *lx16a_bus_create(HardwareSerial      *hardware_serial /* =Serial1 / &Serial2 … */,
