@@ -4,10 +4,28 @@
 pub mod ffi;
 pub use ffi::*;
 
+pub struct HardwareSerial {
+
+    impl: *mut HardwareSerial,
+}
+
+impl HardwareSerial {
+    pub fn begin(&mut self, baud: u32) {
+        unsafe { HardwareSerial_begin(self.impl, baud) };
+    }
+}
+
+impl Drop for HardwareSerial {
+    fn drop(&mut self) {
+        unsafe { HardwareSerial_end(self.impl) };
+    }
+}
+
 // A safe wrapper around the LX16ABus pointer
 pub struct ServoBus {
     ptr: *mut LX16ABusHandle,
 }
+
 
 impl ServoBus {
     pub fn new(serial: *mut HardwareSerial, tx_pin: i32, tx_flag_gpio: i32) -> Self {

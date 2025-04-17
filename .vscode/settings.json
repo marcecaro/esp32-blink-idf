@@ -9,5 +9,6 @@
     },
     "files.associations": {
         "_types.h": "c"
-    }
+    },
+    "rust-analyzer.checkOnSave": false
 }

@@ -210,6 +210,9 @@ unsafe extern "C" {
     pub fn getSerial1() -> *mut HardwareSerial;
 }
 unsafe extern "C" {
+    pub fn getSerial2() -> *mut HardwareSerial;
+}
+unsafe extern "C" {
     pub fn lx16a_bus_create(
         hardware_serial: *mut HardwareSerial,
         baud: u32,
@@ -293,4 +296,13 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn lx16a_servo_temperature(s: *mut LX16AServoHandle) -> i32;
+}
+unsafe extern "C" {
+    pub fn lx16a_servo_vin(s: *mut LX16AServoHandle) -> f32;
+}
+unsafe extern "C" {
+    pub fn lx16a_servo_id_read(s: *mut LX16AServoHandle) -> f32;
+}
+unsafe extern "C" {
+    pub fn lx16a_servo_read_is_motor_mode(s: *mut LX16AServoHandle) -> bool;
 }

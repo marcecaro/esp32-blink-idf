@@ -27,19 +27,15 @@ reconfigure-idf:
 	source ./project-export.sh && idf.py reconfigure && idf.py update-dependencies
 	echo "ESP-IDF Reconfigured."
 
-build-idf:
-	source ./project-export.sh && idf.py -v build 
-	echo "ESP-IDF Build completed."
-
 build-cargo:
 	cargo build 
 
 flash:
-	idf.py flash
+	cargo espflash flash
 	echo "Flash completed."
 
 monitor:
-	espflash monitor
+	cargo espflash monitor
 	echo "Flash completed."
 	
 refresh-idf-deps:
@@ -53,7 +49,7 @@ build: build-cargo
 	echo "Build cargo finished"
 
 
-build-all: build-idf
+build-all: build-cargo
 	echo "Build completed."
 
 bootstrap: full-clean
@@ -69,9 +65,6 @@ bootstrap: full-clean
 	@echo "Close and open a new terminal."
 	@echo ""
 
-extract-includes:
-	idf.py reconfigure
-	cmake -P extract_includes.cmake
 
 .PHONY: build-idf build-cargo build-all flash monitor refresh-deps install-idf-tools find-arduino-h find-arduino-cxx clean full-clean
 

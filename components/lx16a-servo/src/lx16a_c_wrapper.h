@@ -19,8 +19,15 @@ typedef struct LX16AServoHandle LX16AServoHandle;
 
 typedef struct HardwareSerial HardwareSerial;
 
+HardwareSerial *GetSerial();
 
 HardwareSerial *getSerial1();
+
+HardwareSerial *getSerial2();
+
+
+void HardwareSerial_begin(HardwareSerial *, uint32_t baud);
+
 /* ---------- bus life‑cycle ---------- */
 LX16ABusHandle *lx16a_bus_create(HardwareSerial      *hardware_serial /* =Serial1 / &Serial2 … */,
                                  uint32_t   baud,
@@ -70,6 +77,10 @@ void     lx16a_servo_load      (LX16AServoHandle *s, bool enable);
 bool     lx16a_servo_cmd_ok    (LX16AServoHandle *s);  
 int32_t  lx16a_servo_temperature(LX16AServoHandle *s);
 
+
+float lx16a_servo_vin(LX16AServoHandle *s);
+float lx16a_servo_id_read(LX16AServoHandle *s);
+bool lx16a_servo_read_is_motor_mode(LX16AServoHandle *s);
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

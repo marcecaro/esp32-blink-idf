@@ -4,8 +4,26 @@
 struct LX16ABusHandle   { LX16ABus   impl; };
 struct LX16AServoHandle { LX16AServo impl; };
 
+HardwareSerial *GetSerial(){
+    return &Serial;
+};
+
 HardwareSerial *getSerial1() {
     return &Serial1;
+}
+
+HardwareSerial *getSerial2() {
+    return &Serial2;
+};
+
+
+void HardwareSerial_begin(HardwareSerial *impl, uint32_t baud) {
+
+    impl->begin(baud);
+};
+
+void HardwareSerial_end(HardwareSerial *impl) {
+    impl->end();
 }
 
 /* ---------- bus ---------- */
@@ -94,4 +112,16 @@ s->impl.id_write(id);
 void lx16a_servo_motor_mode(LX16AServoHandle *s, int16_t speed)
 {
 s->impl.motor_mode(speed);
+}
+
+float lx16a_servo_vin(LX16AServoHandle *s) {
+    return s->impl.vin();
+}
+
+float lx16a_servo_id_read(LX16AServoHandle *s) {
+    return s->impl.id_read();
+}
+
+bool lx16a_servo_read_is_motor_mode(LX16AServoHandle *s) {
+    return s->impl.readIsMotorMode();
 }

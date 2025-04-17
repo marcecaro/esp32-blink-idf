@@ -19,10 +19,10 @@ fn main() -> anyhow::Result<()> {
     info!("ESP32 LX16A Servo Example Starting...");
     
     // Get Serial1 for servo communication
-    let serial = unsafe { lx16a::getSerial1() };
+    let serial = unsafe { lx16a::getSerial2() };
     
     // Create the servo bus - equivalent to servoBus.begin(&Serial1, 1, 2)
-    let servo_bus = ServoBus::new(serial, 1, 2);
+    let servo_bus = ServoBus::new(serial, 33, -1);
     servo_bus.debug(true);
     
     // Create the servo - equivalent to LX16AServo servo(&servoBus, 1)
