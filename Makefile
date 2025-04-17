@@ -32,7 +32,7 @@ build-idf:
 	echo "ESP-IDF Build completed."
 
 build-cargo:
-	cargo build --target xtensa-esp32-espidf
+	cargo build 
 
 flash:
 	idf.py flash

@@ -1,5 +1,4 @@
 fn main() {
-    embuild::cargo::CfgBuilder::new()
-        .idf_env()   // read EXTRA_COMPONENT_DIRS, IDF_PATH, sdkconfig, …
-        .probe().unwrap();
+    // Relay and output ESP-IDF link flags to the Rust compiler
+    embuild::espidf::sysenv::output();
 }

@@ -6,10 +6,7 @@ edition = "2021"
 resolver = "2"
 rust-version = "1.77"
 
-# Configure as a library instead of a binary
-[lib]
-name = "esp32blinkirust"
-crate-type = ["staticlib"]
+# Now configured as a binary
 
 [profile.release]
 opt-level = "s"
@@ -26,29 +23,29 @@ experimental = ["esp-idf-svc/experimental"]
 [dependencies]
 log = { version = "0.4", default-features = false }
 anyhow = { version = "1.0", default-features = false }
-
 # ESP-IDF dependencies
-esp-idf-sys = { version = "0.36.1", features = ["native"]} #, "binstart"] }
+esp-idf-sys = { version = "0.36.1", features = ["native", "binstart"] }
 esp-idf-hal = "0.45.2"
 esp-idf-svc = { version = "0.51.0", features = ["experimental", "alloc"] }
 
-# For C++ interop
-cxx = "1.0"
-link-cplusplus = "1.0"
 
 [build-dependencies]
 embuild = { version = "0.33.0"}
-bindgen = "0.71.1"
-cc = "1.0"
-cxx-build = "1.0"
 
-# Enforce std with ESP-IDF - critical for ESP32
-[package.metadata.esp-idf-sys]
-#linker-arguments = ["--specs=nosys.specs"]
 
-# Limit std to only essential features for embedded
-[profile.dev.package."*"]
-opt-level = "z"
 
-[profile.release.package."*"]
-opt-level = "z"
+[[package.metadata.esp-idf-sys.extra_components]]
+component_dirs = ["components/lx16a-servo"]     # path(s) to your extra component directories
+bindings_header = "components/lx16a-servo/src/lx16a_c_wrapper.h"
+bindings_module = "lx16a"
+
+[package.metadata.esp-idf-sys.extra_components.1.remote_component]
+name = "espressif/arduino-esp32"
+version = "3.2.0"
+
+# [package.metadata.esp-idf-sys.extra_components.2.remote_component]
+# git = "https://github.com/madhephaestus/lx16a-servo.git"
+# version = "master"
+
+
+
