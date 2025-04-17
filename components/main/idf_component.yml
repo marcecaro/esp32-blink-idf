@@ -14,3 +14,4 @@ dependencies:
   #   # `public` flag doesn't have an effect dependencies of the `main` component.
   #   # All dependencies of `main` are public by default.
   espressif/arduino-esp32: '*'
+  arduino_library_manager/lx16a-servo: "^0.9.3"

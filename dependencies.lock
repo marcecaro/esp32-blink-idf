@@ -145,7 +145,7 @@ dependencies:
       type: service
     version: 0.6.0~1
   espressif/esp-dsp:
-    component_hash: fa7fe74305df6da25867437ebcd4213e047cbfc0556cf92067ab657fce537c6e
+    component_hash: 619639efc18cfa361a9e423739b9b0ffc14991effc6c027f955c2f2c3bf1754b
     dependencies:
     - name: idf
       require: private
@@ -153,7 +153,7 @@ dependencies:
     source:
       registry_url: https://components.espressif.com
       type: service
-    version: 1.5.2
+    version: 1.6.0
   espressif/esp-modbus:
     component_hash: e42ebfdfc9d8e46821a915b4c1a5c6465c44dbd4e1bca10531e26f4adc7acc42
     dependencies:

@@ -21,26 +21,34 @@ opt-level = "z"
 
 [features]
 default = []
-
 experimental = ["esp-idf-svc/experimental"]
 
 [dependencies]
-log = "0.4"
-anyhow = "1.0"
-# Use specific versions compatible with ESP-IDF v5.4.1
-# Let esp-idf-hal and esp-idf-svc pull in their required esp-idf-sys version
-esp-idf-sys = { version = "0.36.1", features = ["native"] }
+log = { version = "0.4", default-features = false }
+anyhow = { version = "1.0", default-features = false }
+
+# ESP-IDF dependencies
+esp-idf-sys = { version = "0.36.1", features = ["native"]} #, "binstart"] }
 esp-idf-hal = "0.45.2"
 esp-idf-svc = { version = "0.51.0", features = ["experimental", "alloc"] }
-cxx = "1.0"
 
+# For C++ interop
+cxx = "1.0"
+link-cplusplus = "1.0"
 
 [build-dependencies]
 embuild = { version = "0.33.0"}
-cmake = "0.1"
-libc = "0.2"
 bindgen = "0.71.1"
 cc = "1.0"
 cxx-build = "1.0"
-uuid = { version = "1.7.0", features = ["v4"] }
-serde_json = "1.0"
+
+# Enforce std with ESP-IDF - critical for ESP32
+[package.metadata.esp-idf-sys]
+#linker-arguments = ["--specs=nosys.specs"]
+
+# Limit std to only essential features for embedded
+[profile.dev.package."*"]
+opt-level = "z"
+
+[profile.release.package."*"]
+opt-level = "z"

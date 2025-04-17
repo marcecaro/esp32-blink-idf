@@ -53,7 +53,7 @@ build: build-cargo
 	echo "Build cargo finished"
 
 
-build-all: build-idf build-cargo
+build-all: build-idf
 	echo "Build completed."
 
 bootstrap: full-clean

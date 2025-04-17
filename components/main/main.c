@@ -4,7 +4,7 @@
 static const char* TAG = "ESP32_BLINK";
 
 // Standard C entry point with full ESP-IDF initialization
-void app_main(void) {
+void nope_app_main(void) {
     ESP_LOGI(TAG, "Initializing ESP-IDF in app_main");
     
     // Initialize NVS - essential for ESP-IDF
