@@ -1,8 +1,8 @@
 
 // Re-export the FFI bindings
+#[allow(warnings)]
 pub mod ffi;
 pub use ffi::*;
-use std::time::{Duration, Instant};
 
 // A safe wrapper around the LX16ABus pointer
 pub struct ServoBus {
@@ -53,6 +53,7 @@ impl Servo {
         unsafe { lx16a_servo_cmd_ok(self.ptr) }
     }
 
+    #[allow(dead_code)]
     pub fn set_id(&self, new_id: u8) {
         unsafe { lx16a_servo_set_id(self.ptr, new_id) };
     }
