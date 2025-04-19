@@ -18,25 +18,22 @@ typedef struct LX16ABusHandle   LX16ABusHandle;
 typedef struct LX16AServoHandle LX16AServoHandle;
 typedef struct HardwareSerial HardwareSerial;
 
-HardwareSerial *GetSerial();
-
+HardwareSerial *getSerial();
 HardwareSerial *getSerial1();
-
 HardwareSerial *getSerial2();
-
 
 void HardwareSerial_begin(HardwareSerial *, uint32_t baud);
 void HardwareSerial_end(HardwareSerial *);
 
 /* ---------- bus life‑cycle ---------- */
-LX16ABusHandle *lx16a_bus_create(HardwareSerial      *hardware_serial /* =Serial1 / &Serial2 … */,
-                                 uint32_t   baud,
-                                 int        tx_pin,
-                                 int        tx_flag_gpio /* ‑1 if unused            */);
+LX16ABusHandle *lx16a_bus_create();
 void            lx16a_bus_destroy(LX16ABusHandle *bus);
 
 
 /* ---------- bus helpers ---------- */
+
+void lx16a_bus_beginOnePinMode(LX16ABusHandle *bus, HardwareSerial * port, int tXrXpin);
+
 void     lx16a_bus_debug      (LX16ABusHandle *bus, bool on);
 void     lx16a_bus_set_retries(LX16ABusHandle *bus, uint8_t n);
 void     lx16a_bus_disable_all(LX16ABusHandle *bus);
@@ -58,6 +55,7 @@ LX16AServoHandle *lx16a_servo_create (LX16ABusHandle *bus, uint8_t id);
 void              lx16a_servo_destroy(LX16AServoHandle *s);
 
 /* ---------- servo motion / control ---------- */
+void lx16a_servo_initialize(LX16AServoHandle *s);
 void     lx16a_servo_move_time (LX16AServoHandle *s, int32_t cent_deg, uint16_t time_ms);
 int32_t  lx16a_servo_pos_read  (LX16AServoHandle *s);
 int32_t  lx16a_servo_pos_cached(LX16AServoHandle *s);

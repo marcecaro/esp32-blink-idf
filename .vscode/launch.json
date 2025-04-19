@@ -5,11 +5,41 @@
       "name": "Wokwi GDB",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/target/xtensa-esp32-espidf/debug/esp32_blink_idf",
+      "program": "${workspaceFolder}/target/xtensa-esp32-espidf/debug/esp32-blink-idf",
       "cwd": "${workspaceFolder}",
       "MIMode": "gdb",
-      "miDebuggerPath": "${userHome}/.espressif/tools/xtensa-esp32-elf/esp-2021r2-patch3-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb",
+      "miDebuggerPath": "${workspaceFolder}/.embuild/espressif/esp-idf/v5.4.1/tools/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin/xtensa-esp32-elf-gdb",
       "miDebuggerServerAddress": "localhost:3333"
+    },
+    {
+      "name": "Debug ESP32 (UART GDBStub)",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/target/xtensa-esp32-espidf/debug/esp32-blink-idf",
+      "MIMode": "gdb",
+      "miDebuggerPath": "${workspaceFolder}/.embuild/espressif/esp-idf/v5.4.1/tools/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin/xtensa-esp32-elf-gdb",
+      "externalConsole": false,
+      "stopAtEntry": true,
+      "logging": {
+         "engineLogging": true,
+         "trace": true,
+         "traceResponse": true
+      },
+      "launchCompleteCommand": "None",
+      "preLaunchTask": "Prepare ESP32 for Debugging",
+   //   "miDebuggerArgs": "-ex \"set remotetimeout 250\" -ex \"set serial baud 115200\" -ex \"set confirm off\" -ex \"set mem inaccessible-by-default off\" -ex \"target remote /dev/ttyUSB0\" -ex \"interrupt\" -ex \"set pagination off\" -ex \"b main\"",
+      "setupCommands": [
+        { "description": "Set timeout", "text": "set remotetimeout 250", "ignoreFailures": false },
+        { "description": "Configure baud rate", "text": "set serial baud 115200", "ignoreFailures": false },
+        { "description": "Disable confirmation prompts", "text": "set confirm off", "ignoreFailures": false },
+        { "description": "Allow memory access", "text": "set mem inaccessible-by-default off", "ignoreFailures": false },
+        { "description": "Connect to ESP32 GDBStub", "text": "target remote /dev/ttyUSB0", "ignoreFailures": false },
+        { "description": "Stop execution", "text": "interrupt", "ignoreFailures": true },
+        { "description": "Set pagination off", "text": "set pagination off", "ignoreFailures": true },
+        { "description": "Set breakpoint at Rust main", "text": "b main", "ignoreFailures": true }
+      ]
     }
   ]
 }
+

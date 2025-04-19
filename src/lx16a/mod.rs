@@ -4,20 +4,34 @@
 pub mod ffi;
 pub use ffi::*;
 
-pub struct HardwareSerial {
-
-    impl: *mut HardwareSerial,
+pub struct LX16AHardwareSerial {
+    ptr: *mut HardwareSerial,
 }
 
-impl HardwareSerial {
-    pub fn begin(&mut self, baud: u32) {
-        unsafe { HardwareSerial_begin(self.impl, baud) };
+impl LX16AHardwareSerial {
+    #[allow(dead_code)]
+    pub fn begin(&mut self, baud: u32) -> () {
+        unsafe { HardwareSerial_begin(self.ptr, baud) };
     }
+
+    #[allow(dead_code)]
+    pub fn new() -> Self {
+        Self { ptr: unsafe { getSerial() } }
+    }
+    #[allow(dead_code)]
+    pub fn new_1() -> Self {
+        Self { ptr: unsafe { getSerial1() } }
+    }
+    #[allow(dead_code)]
+    pub fn new_2() -> Self {
+        Self { ptr: unsafe { getSerial2() } }
+    }
+
 }
 
-impl Drop for HardwareSerial {
+impl Drop for LX16AHardwareSerial {
     fn drop(&mut self) {
-        unsafe { HardwareSerial_end(self.impl) };
+        unsafe { HardwareSerial_end(self.ptr) };
     }
 }
 
@@ -28,14 +42,50 @@ pub struct ServoBus {
 
 
 impl ServoBus {
-    pub fn new(serial: *mut HardwareSerial, tx_pin: i32, tx_flag_gpio: i32) -> Self {
-        let ptr = unsafe { lx16a_bus_create(serial, 115200, tx_pin, tx_flag_gpio) };
+    #[allow(dead_code)]
+    pub fn new() -> Self {
+        let ptr = unsafe { lx16a_bus_create() };
         Self { ptr }
     }
 
+    #[allow(dead_code)]
     pub fn debug(&self, enable: bool) {
         unsafe { lx16a_bus_debug(self.ptr, enable) };
     }
+
+    #[allow(dead_code)]
+    pub fn begin_one_pin_mode(&self, serial: LX16AHardwareSerial, tx_pin: i32) {
+        unsafe { lx16a_bus_beginOnePinMode(self.ptr, serial.ptr, tx_pin) };
+    }
+
+    #[allow(dead_code)]
+    pub fn set_retries(&self, n: u8) {
+        unsafe { lx16a_bus_set_retries(self.ptr, n) };
+    }
+
+    // pub fn disable_all(&self) {
+    //     unsafe { lx16a_bus_disable_all(self.ptr) };
+    // }
+
+    // pub fn time_ms(&self, n_bytes: u32) -> u32 {
+    //     unsafe { lx16a_bus_time_ms(self.ptr, n_bytes) }
+    // }
+
+    // pub fn time_us(&self, n_bytes: u32) -> u32 {
+    //     unsafe { lx16a_bus_time_us(self.ptr, n_bytes) }
+    // }
+
+    // pub fn write(&self, cmd: u8, params: *const u8, param_cnt: i32, id: u8) -> bool {
+    //     unsafe { lx16a_bus_write(self.ptr, cmd, params, param_cnt, id) }
+    // }
+
+    // pub fn read(&self, cmd: u8, params: *mut u8, param_len: i32, id: u8) -> bool {
+    //     unsafe { lx16a_bus_read(self.ptr, cmd, params, param_len, id) }
+    // }
+
+    // pub fn read_no_retry(&self, cmd: u8, params: *mut u8, param_len: i32, id: u8) -> bool {
+    //     unsafe { lx16a_bus_read_no_retry(self.ptr, cmd, params, param_len, id) }
+    // }
 }
 
 impl Drop for ServoBus {
@@ -80,20 +130,24 @@ impl Servo {
         // This is a simplification since we don't have direct access to readIsMotorMode()
         // We're returning false as a placeholder - in a real implementation you would
         // need to implement this functionality if needed
-        false
+        unsafe { lx16a_servo_read_is_motor_mode(self.ptr) }
     }
 
     // The vin() function doesn't appear to be in the bindings, so we're using a placeholder
     pub fn vin(&self) -> f32 {
         // In a real implementation, you would need to call the actual voltage reading function
         // For now, we return a placeholder value
-        5.0
+        unsafe { lx16a_servo_vin(self.ptr) }
     }
 
-    pub fn id_read(&self) -> u8 {
+    pub fn id_read(&self) -> f32 {
         // This is a placeholder as well
         // In a real implementation, you would need to implement this
-        1
+        unsafe { lx16a_servo_id_read(self.ptr) }
+    }
+
+    pub fn initialize(&self) {
+        unsafe { lx16a_servo_initialize(self.ptr) };
     }
 }
 

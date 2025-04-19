@@ -1,11 +1,12 @@
 #include "lx16a-servo.h"
 #include "lx16a_c_wrapper.h"
+#include <HardwareSerial.h>
 
 struct LX16ABusHandle   { LX16ABus   impl; };
 struct LX16AServoHandle { LX16AServo impl; };
  
 
-HardwareSerial *GetSerial(){
+HardwareSerial *getSerial(){
     return &Serial;
 };
 
@@ -28,16 +29,9 @@ void HardwareSerial_end(HardwareSerial *impl) {
 }
 
 /* ---------- bus ---------- */
-LX16ABusHandle *lx16a_bus_create(HardwareSerial *serial,
-                                 uint32_t baud,
-                                 int      tx_pin,
-                                 int      tx_flag_gpio)
+LX16ABusHandle *lx16a_bus_create()
 {
-    if (!serial) return nullptr;
-    auto *h = new LX16ABusHandle;
-    h->impl.begin(static_cast<HardwareSerial *>(serial), tx_pin, tx_flag_gpio);
-    h->impl.setRetryCount(3);
-    return h;
+    return new LX16ABusHandle{LX16ABus()};
 }
 void lx16a_bus_destroy(LX16ABusHandle *h)               { delete h; }
 
@@ -48,16 +42,20 @@ uint32_t lx16a_bus_time_ms(LX16ABusHandle *h, uint32_t n){ return h->impl.time(n
 uint32_t lx16a_bus_time_us(LX16ABusHandle *h, uint32_t n){ return h->impl.timeus(n); }
 
 
+void lx16a_bus_beginOnePinMode(LX16ABusHandle *bus, HardwareSerial * port, int tXrXpin){
+    bus->impl.beginOnePinMode(port, tXrXpin);
+}
+
+
 /* ---------- servo ---------- */
 LX16AServoHandle *lx16a_servo_create(LX16ABusHandle *bus, uint8_t id)
 {
     if (!bus) return nullptr;
-    auto *s = new LX16AServoHandle{ LX16AServo(&bus->impl, id) };
-    s->impl.initialize();              // optional – safe‑guard
+    auto *s = new LX16AServoHandle{ LX16AServo(&bus->impl, id) };            // optional – safe‑guard
     return s;
 }
 void lx16a_servo_destroy(LX16AServoHandle *s)           { delete s; }
-
+void lx16a_servo_initialize(LX16AServoHandle *s) { s->impl.initialize(); }
 int32_t lx16a_servo_pos_read  (LX16AServoHandle *s)                        {return s->impl.pos_read();}
 int32_t lx16a_servo_pos_cached(LX16AServoHandle *s)                        {return s->impl.pos_read_cached();}
 

@@ -207,21 +207,32 @@ pub struct HardwareSerial {
     _unused: [u8; 0],
 }
 unsafe extern "C" {
+    pub fn getSerial() -> *mut HardwareSerial;
+}
+unsafe extern "C" {
     pub fn getSerial1() -> *mut HardwareSerial;
 }
 unsafe extern "C" {
     pub fn getSerial2() -> *mut HardwareSerial;
 }
 unsafe extern "C" {
-    pub fn lx16a_bus_create(
-        hardware_serial: *mut HardwareSerial,
-        baud: u32,
-        tx_pin: ::std::os::raw::c_int,
-        tx_flag_gpio: ::std::os::raw::c_int,
-    ) -> *mut LX16ABusHandle;
+    pub fn HardwareSerial_begin(arg1: *mut HardwareSerial, baud: u32);
+}
+unsafe extern "C" {
+    pub fn HardwareSerial_end(arg1: *mut HardwareSerial);
+}
+unsafe extern "C" {
+    pub fn lx16a_bus_create() -> *mut LX16ABusHandle;
 }
 unsafe extern "C" {
     pub fn lx16a_bus_destroy(bus: *mut LX16ABusHandle);
+}
+unsafe extern "C" {
+    pub fn lx16a_bus_beginOnePinMode(
+        bus: *mut LX16ABusHandle,
+        port: *mut HardwareSerial,
+        tXrXpin: ::std::os::raw::c_int,
+    );
 }
 unsafe extern "C" {
     pub fn lx16a_bus_debug(bus: *mut LX16ABusHandle, on: bool);
@@ -261,6 +272,9 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn lx16a_servo_destroy(s: *mut LX16AServoHandle);
+}
+unsafe extern "C" {
+    pub fn lx16a_servo_initialize(s: *mut LX16AServoHandle);
 }
 unsafe extern "C" {
     pub fn lx16a_servo_move_time(s: *mut LX16AServoHandle, cent_deg: i32, time_ms: u16);
