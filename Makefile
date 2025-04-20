@@ -30,7 +30,7 @@ reconfigure-idf:
 build-cargo:
 	cargo build 
 
-flash:
+flash:build
 	cargo espflash flash
 	echo "Flash completed."
 
@@ -48,6 +48,8 @@ install-idf-tools:
 build: build-cargo
 	echo "Build cargo finished"
 
+clean: clean-idf clean-cargo 
+	echo "Clean completed."
 
 build-all: build-cargo
 	echo "Build completed."
@@ -66,8 +68,8 @@ bootstrap: full-clean
 	@echo ""
 
 openicd:
-	openocd -f esp32-jtag.cfg
-	echo "OpenOCD started."
+	bash -c 'trap "echo \"OpenOCD stopped, restarting...\"" INT; while true; do openocd -f esp32-jtag.cfg || true; sleep 1; done'
+	@echo "OpenOCD loop exited."
 
 
 .PHONY: openicd build-idf build-cargo build-all flash monitor refresh-deps install-idf-tools find-arduino-h find-arduino-cxx clean full-clean

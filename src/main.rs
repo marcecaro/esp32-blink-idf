@@ -9,6 +9,7 @@ use log::*;
 use esp_idf_hal::delay::FreeRtos;
 use crate::lx16a::*;
 use std::time::{Duration, Instant};
+use std::hint::black_box;
 
 // main.rs (or main.cpp if you prefer C++)
 unsafe extern "C" {
@@ -28,37 +29,34 @@ fn main() -> anyhow::Result<()> {
     // Give debugger time to attach
     
     info!("Initializing Arduino...");
-    arduino_init();
+   // arduino_init();
     info!("Arduino initialized");
     // Set ESP-IDF logger
-    EspLogger::initialize_default();
+    //EspLogger::initialize_default();
     info!("ESP-IDF Logger initialized");
     
 
     warn!("ESP32 LX16A Servo Example Starting...");
-    
+    let mut serial = LX16AHardwareSerial::new();
+    serial.begin(115200);
     // Get Serial1 for servo communication
     // Create the servo bus - equivalent to servoBus.begin(&Serial1, 1, 2)
     let servo_bus = ServoBus::new();
-    servo_bus.begin_one_pin_mode(LX16AHardwareSerial::new_2(), 33);
+    let mut serial2 = LX16AHardwareSerial::new_2();
+
+    servo_bus.begin_one_pin_mode(serial2, 33);
     servo_bus.debug(true);
+    servo_bus.set_retries(5);
     
     // Create the servo - equivalent to LX16AServo servo(&servoBus, 1)
-    let servo = Servo::new(&servo_bus, 1);
-    servo.initialize(); // Servo Number is 1
-    
+    let servo = Servo::new(&servo_bus, 3);
+    servo.move_time(13000,3000);
     // Main application loop
     info!("Main loop starting");
     
     warn!("System fully initialized");
     loop {
-        #[cfg(debug_assertions)]
-        {
-            // This line is for GDBStub debugging, not needed for JTAG
-            // debug_break();  // This will trigger the GDBStub
-        }
         let divisor = 4;
-        
         // Good breakpoint spot here
         
         for i in 0..1000/divisor {
@@ -72,11 +70,11 @@ fn main() -> anyhow::Result<()> {
             //       if servo.is_command_ok() { "OK" } else { "\n\nERR!!\n\n" });
             
             // Keep trying until the command is successful
-           // loop {
-                servo.move_time(angle, 10 * divisor as u16);
-            //    if servo.is_command_ok() { break; }
-            //}
+            servo.move_time(angle, 10 * divisor as u16);
             
+            // Using black_box to prevent compiler from optimizing away the function call
+            let x = servo.is_command_ok();
+            warn!("is_command_ok = {}", x);
             
             warn!("Voltage = {}", servo.vin());
             warn!("Temp = {}", servo.temperature());
