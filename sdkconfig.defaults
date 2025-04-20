@@ -1,40 +1,22 @@
 CONFIG_ESP_ALLOW_MULTIPLE_DEFINITIONS=y
 CONFIG_COMPILER_CXX_EXCEPTIONS=n
 
-# Debug stubs
-CONFIG_ESP_DEBUG_STUBS_ENABLE=y                # include the stub in the binary
-CONFIG_ESP_SYSTEM_GDBSTUB_RUNTIME_SUPPORT=y    # allow starting it from code
-CONFIG_COMPILER_OPTIMIZATION_LEVEL_DEBUG=y     # keeps line info even in release
-
-CONFIG_ESP_SYSTEM_GDBSTUB_ENABLE=y             # enable the stub
-CONFIG_ESP_SYSTEM_GDBSTUB_RUNTIME=y
-CONFIG_ESP_SYSTEM_PANIC_GDBSTUB=y   # (use GDBStub on panic)
-
 CONFIG_ESP_TASK_WDT=n
 CONFIG_ESP_INT_WDT=n
 CONFIG_ESP_SYSTEM_WDT=n
 
+# Debug options
+CONFIG_ESP32_APPTRACE_ENABLE=y
+CONFIG_ESP32_APPTRACE_LOCK_ENABLE=y
+CONFIG_FREERTOS_GENERATE_RUN_TIME_STATS=y
+CONFIG_ESP_DEBUG_STUBS_ENABLE=y
+CONFIG_ESP_SYSTEM_CHECK_INT_LEVEL_4=y
 
+CONFIG_ESP32_DEBUG_STUBS_ENABLE=y
 
-##### SILENCE #####
+# Additional debug settings to improve reliability
+CONFIG_FREERTOS_WATCHPOINT_END_OF_STACK=y
+CONFIG_ESP_SYSTEM_SINGLE_CORE_MODE=y
+CONFIG_ESP_CACHE_FLASH_IGNORE_CORE_DUMP=n
 
-# silence boot messages
-CONFIG_BOOTLOADER_LOG_LEVEL_NONE=y            # no bootloader banner :contentReference[oaicite:0]{index=0}
-CONFIG_BOOT_ROM_LOG_ALWAYS_OFF=y              # no ROM boot log :contentReference[oaicite:1]{index=1}
-
-# silence application logs until you start them yourself
-# Use UART0 for GDBStub (debug port)
-CONFIG_ESP_CONSOLE_UART_NUM=0
 CONFIG_ESP_SYSTEM_GDBSTUB_RUNTIME=y
-CONFIG_ESP_SYSTEM_GDBSTUB_RUNTIME_SUPPORT=y
-
-# If you want to move logs to a different UART in the future,
-# comment out the line above and uncomment these:
-# CONFIG_ESP_CONSOLE_UART_NUM=1
-# CONFIG_ESP_CONSOLE_UART_TX_GPIO=17
-# CONFIG_ESP_CONSOLE_UART_RX_GPIO=18
-
-### MOVE LOGS TO ANOTHER UART ###
-#CONFIG_ESP_CONSOLE_UART_NUM=1       # logs on UART‑1
-#CONFIG_ESP_CONSOLE_UART_TX_GPIO=17  # pick free pins
-#CONFIG_ESP_CONSOLE_UART_RX_GPIO=18

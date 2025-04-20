@@ -65,6 +65,10 @@ bootstrap: full-clean
 	@echo "Close and open a new terminal."
 	@echo ""
 
+openicd:
+	openocd -f esp32-jtag.cfg
+	echo "OpenOCD started."
 
-.PHONY: build-idf build-cargo build-all flash monitor refresh-deps install-idf-tools find-arduino-h find-arduino-cxx clean full-clean
+
+.PHONY: openicd build-idf build-cargo build-all flash monitor refresh-deps install-idf-tools find-arduino-h find-arduino-cxx clean full-clean
 

@@ -1,34 +1,49 @@
 {
     "version": "2.0.0",
-"tasks": [
+    "tasks": [
+        // {
+        //     "label": "Start OpenOCD",
+        //     "type": "shell",
+        //     "command": "openocd -f ${workspaceFolder}/esp32-jtag.cfg",
+        //     "isBackground": true,
+        //     "problemMatcher": [
+        //         {
+        //             "pattern": [
+        //                 {
+        //                     "regexp": ".",
+        //                     "file": 1,
+        //                     "location": 2,
+        //                     "message": 3
+        //                 }
+        //             ],
+        //             "background": {
+        //                 "activeOnStart": true,
+        //                 "beginsPattern": ".*",
+        //                 "endsPattern": ".*Listening on port 3333 for gdb connections"
+        //             }
+        //         }
+        //     ]
+        // },
         {
             "label": "cargo build",
             "type": "shell",
             "command": "cargo build --target xtensa-esp32-espidf",
-            "options": { "cwd": "${workspaceFolder}" },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
             "group": "build",
-            "problemMatcher": ["$rustc"]
-        },
-        {
-            "label": "Reset Hardware",
-            "type": "shell",
-            "command": "bash -c -- echo -e '\\x03' > /dev/ttyUSB0 && sleep 1",
-            "options": { "cwd": "${workspaceFolder}" },
-            "problemMatcher": []
-        },
-        {
-            "label": "Prepare ESP32 for Debugging",
-            "type": "shell",
-            "command": "bash -c 'if [ ! -c \"/dev/ttyUSB0\" ]; then echo \"Error: Device not found at /dev/ttyUSB0\"; exit 1; fi; echo \"Preparing ESP32 for debugging...\"; stty -F /dev/ttyUSB0 115200; echo -e \"\\x03\" > /dev/ttyUSB0; sleep 3'",
-            "options": { "cwd": "${workspaceFolder}" },
-            "problemMatcher": []
+            "problemMatcher": [
+                "$rustc"
+            ]
         },
         {
             "label": "Clean Project",
             "type": "shell",
             "command": "cargo clean",
-            "options": { "cwd": "${workspaceFolder}" },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
             "problemMatcher": []
-       }
+        }
     ]
 }

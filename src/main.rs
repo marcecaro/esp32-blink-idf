@@ -1,5 +1,7 @@
 use esp_idf_sys as _; // If using the `binstart` feature of `esp-idf-sys`, always keep this module imported
 
+// Using regular code with no special debug markers
+
 // Import our lx16a module
 mod lx16a;
 use esp_idf_svc::log::EspLogger;
@@ -8,24 +10,6 @@ use esp_idf_hal::delay::FreeRtos;
 use crate::lx16a::*;
 use std::time::{Duration, Instant};
 
-/// Trigger the GDBStub by causing a controlled panic
-#[inline(never)]
-fn debug_break() {
-    #[cfg(debug_assertions)]
-    {
-        println!("\n\nENTERING DEBUG MODE - CONNECT GDB NOW!\n\n");
-        
-        // This will cause the ESP32 to enter the GDBStub mode
-        // since CONFIG_ESP32_PANIC_GDBSTUB=y in sdkconfig
-        #[allow(unconditional_panic)]
-        panic!("Intentional panic to trigger GDBStub");
-    }
-    
-    #[cfg(not(debug_assertions))]
-    {
-        // Do nothing in release builds
-    }
-}
 // main.rs (or main.cpp if you prefer C++)
 unsafe extern "C" {
     unsafe fn initArduino();
@@ -37,29 +21,18 @@ fn arduino_init() {
 
 
 fn main() -> anyhow::Result<()> {
-    unsafe {
-        esp_idf_sys::esp_task_wdt_deinit();  // Disable the Task Watchdog Timer
-    }
+    // Initialize ESP-IDF patches
+    esp_idf_sys::link_patches();
+    // Simple set of variables to make breakpoints more reliable
+    
+    // Give debugger time to attach
+    
     info!("Initializing Arduino...");
     arduino_init();
     info!("Arduino initialized");
-    esp_idf_sys::link_patches();
-    println!("ESP32 starting, connect debugger now!");
-    
-    // Initialize ESP-IDF patches
-    
-    
     // Set ESP-IDF logger
     EspLogger::initialize_default();
     info!("ESP-IDF Logger initialized");
-    
-    // Check for debug mode marker in GPIO or compile-time flag
-    
-    // Disable watchdog to prevent resets during debugging
-    // unsafe {
-    //     esp_idf_sys::esp_task_wdt_deinit();
-    // }
-    
     
 
     warn!("ESP32 LX16A Servo Example Starting...");
@@ -81,10 +54,12 @@ fn main() -> anyhow::Result<()> {
     loop {
         #[cfg(debug_assertions)]
         {
-            // Uncomment the next line when you want to debug
-          //  debug_break();  // This will trigger the GDBStub
+            // This line is for GDBStub debugging, not needed for JTAG
+            // debug_break();  // This will trigger the GDBStub
         }
         let divisor = 4;
+        
+        // Good breakpoint spot here
         
         for i in 0..1000/divisor {
             let start = Instant::now();
