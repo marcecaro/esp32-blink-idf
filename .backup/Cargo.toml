@@ -6,11 +6,7 @@ edition = "2021"
 resolver = "2"
 rust-version = "1.77"
 
-
-# Configure ESP-IDF components
-[package.metadata.esp-idf-sys]
-esp_idf_version = "v5.4.1"
-
+# Now configured as a binary
 
 [profile.release]
 opt-level = "s"
@@ -27,20 +23,13 @@ experimental = ["esp-idf-svc/experimental"]
 [dependencies]
 log = { version = "0.4", default-features = false }
 anyhow = { version = "1.0", default-features = false }
+# ESP-IDF dependencies
 esp-idf-sys = { version = "0.36.1", features = ["native", "binstart"] }
 esp-idf-hal = "0.45.2"
 esp-idf-svc = { version = "0.51.0", features = ["experimental"] }
 
 [build-dependencies]
-embuild = { version = "0.33.0" }
-#bindgen = "0.71.1"
+embuild = { version = "0.33.0"}
+bindgen = "0.71.1"
 
-# TEMPORAL until the crates gets updated
-# Using stable published versions instead of git master branches
-# Removing patched crates from master branch that contain bugs
-# [patch.crates-io]
-# esp-idf-svc = { git = "https://github.com/esp-rs/esp-idf-svc", branch = "master" }
-# esp-idf-hal = { git = "https://github.com/esp-rs/esp-idf-hal", branch = "master" }
-# esp-idf-sys = { git = "https://github.com/esp-rs/esp-idf-sys", branch = "master" }
-# embuild     = { git = "https://github.com/esp-rs/embuild",     branch = "master" }
 

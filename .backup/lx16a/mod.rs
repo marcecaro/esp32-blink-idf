@@ -54,7 +54,7 @@ impl ServoBus {
     }
 
     #[allow(dead_code)]
-    pub fn begin_one_pin_mode(&self, serial: LX16AHardwareSerial, tx_pin: i32) {
+    pub fn begin_one_pin_mode(&self, serial: &LX16AHardwareSerial, tx_pin: i32) {
         unsafe { lx16a_bus_beginOnePinMode(self.ptr, serial.ptr, tx_pin) };
     }
 

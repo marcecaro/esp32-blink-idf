@@ -31,12 +31,16 @@ build-cargo:
 	cargo build 
 
 flash:build
-	cargo espflash flash
+	cargo espflash flash --monitor
 	echo "Flash completed."
+
+flash-jtag: build-cargo
+	openocd -f esp32-jtag.cfg -c "program target/xtensa-esp32-espidf/debug/esp32-blink-idf verify reset exit"
+	echo "JTAG Flash completed."
 
 monitor:
 	cargo espflash monitor
-	echo "Flash completed."
+	echo "MOnitoring completed."
 	
 refresh-idf-deps:
 	source ./project-export.sh && idf.py reconfigure && idf.py update-dependencies
@@ -54,13 +58,13 @@ clean: clean-idf clean-cargo
 build-all: build-cargo
 	echo "Build completed."
 
-bootstrap: full-clean
-	-unset IDF_PATH && cargo clean
-	-cargo update
-	-unset IDF_PATH && cargo build
-	-source idf.env && ${IDF_PATH}/install.sh 
-	-cargo update
-	-cargo install bindgen-cli
+bootstrap: full-clean # uses system esp-idf, it needs to be installed
+	-source $$HOME/export-esp.sh && cargo clean
+	-source $$HOME/export-esp.sh && cargo update
+	-source $$HOME/export-esp.sh && cargo build
+	-source project-export.sh && ${IDF_PATH}/install.sh 
+	-source project-export.sh && cargo update
+	#-cargo install bindgen-cli
 	@echo ""
 	@echo ""
 	@echo "Bootstrap completed."
@@ -72,5 +76,4 @@ openicd:
 	@echo "OpenOCD loop exited."
 
 
-.PHONY: openicd build-idf build-cargo build-all flash monitor refresh-deps install-idf-tools find-arduino-h find-arduino-cxx clean full-clean
-
+.PHONY: openicd build-idf build-cargo build-all flash flash-jtag monitor refresh-deps install-idf-tools find-arduino-h find-arduino-cxx clean full-clean

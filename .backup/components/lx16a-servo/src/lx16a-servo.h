@@ -551,7 +551,7 @@ public:
 	 to convert the data to convert the data to “unsigned short int “type of data before sending the
 	 command packet.
 	 */
-	void motor_mode(int16_t speed) {
+	void       motor_mode(int16_t speed) {
 		bool isMotorMode_tmp = speed != 0;
 		uint8_t params[] = { (uint8_t) (isMotorMode_tmp ? 1 : 0), 0,
 				(uint8_t) speed, (uint8_t) (speed >> 8) };
