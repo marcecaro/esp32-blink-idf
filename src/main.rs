@@ -4,13 +4,22 @@ use log::*;
 use std::thread::sleep;
 use std::time::Duration;
 use esp_idf_hal::peripherals::Peripherals;
-use esp_idf_hal::uart::config::{Config, DataBits, StopBits};
-use esp_idf_hal::units::Hertz;
+
+
 
 // Import lewan_bus module
 mod lewan_bus;
 use crate::lewan_bus::LewanSoulBus;
-// main.rs (or main.cpp if you prefer C++)
+
+// Import wifi module
+mod wifi;
+use crate::wifi::wifi_init;
+
+mod servos;
+use crate::servos::init_servos;
+
+// Import EspWifi
+use esp_idf_svc::wifi::EspWifi;
 
 fn main() -> anyhow::Result<()> {
     // Initialize ESP-IDF patches
@@ -22,27 +31,15 @@ fn main() -> anyhow::Result<()> {
         // Take all peripherals
     let peripherals = Peripherals::take().unwrap();
 
-    // UART1 with default pins (TX=GPIO32, RX=GPIO33)
-    let config = Config::default().baudrate(Hertz(115_200))
-    .data_bits(DataBits::DataBits8)
-    .parity_none()
-    .stop_bits(StopBits::STOP1);
     
-    let mut bus = LewanSoulBus::new(
-        peripherals.uart1,
-        peripherals.pins.gpio32,
-        peripherals.pins.gpio33,
-        &config,
-    )?;
-
     // Set servo ID 1 to 90 degrees in 1 second
-    
+    let _wifi: EspWifi = wifi_init("fliacaro", "50344212")?;
+
+    let mut bus: LewanSoulBus = init_servos(peripherals.uart1, peripherals.pins.gpio32, peripherals.pins.gpio33)?;
 
     // Main loop that runs indefinitely
     let mut i = 0;  
     loop {
-        // Move servo to 90 degrees
-
         // Read current position
         match bus.read_position(1) {
             Ok(pos) => println!("Servo position (0-1000 units): {}", pos),
@@ -59,28 +56,5 @@ fn main() -> anyhow::Result<()> {
         // Give it some time to move
         sleep(Duration::from_millis(2000));
 
-        // // Read current position
-        // match bus.read_position(1) {
-        //     Ok(pos) => info!("Servo position (0-1000 units): {}", pos),
-        //     Err(e) => error!("Failed to read position: {:?}", e),
-        // }
-
-        // // Enable torque (power)
-        // bus.set_torque(1, true)?;
-
-        // // Set angle limits (45° to 135°)
-        // bus.set_angle_limits(1, 45.0, 135.0)?;
-
-        // // Switch to motor mode at half speed forward
-        // //bus.set_mode(1, true, 500)?;
-
-        // wait 500 ms
-        //sleep(Duration::from_millis(500));
-        
-        // To exit the loop (we won't reach this in practice)
-        // Uncomment this to make the program exit after one cycle
-        // if condition_to_exit {
-        //     break Ok(());
-        // }
     }
 }

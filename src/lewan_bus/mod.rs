@@ -4,8 +4,6 @@ use esp_idf_hal::peripheral::Peripheral;
 use esp_idf_hal::gpio::{OutputPin, InputPin, AnyIOPin};
 use esp_idf_sys::esp_timer_get_time;
 use anyhow::Error;
-use std::thread::sleep;
-use std::time::Duration;
 
 /// Constants for servo command codes (from LewanSoul LX-16A protocol)
 const CMD_MOVE_TIME_WRITE: u8 = 1;       // Move servo to position with time
