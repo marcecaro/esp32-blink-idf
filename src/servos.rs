@@ -7,7 +7,7 @@ use esp_idf_hal::gpio::{OutputPin, InputPin};
 use crate::lewan_bus::LewanSoulBus;
 
 
-pub fn init_servos<U, UART, TX, RX, P1, P2>(uart: UART, rx: TX, tx: RX) -> anyhow::Result<LewanSoulBus<'static>> 
+pub fn init_servos<U, UART, TX, RX, P1, P2>(uart: UART, rx: RX, tx: TX) -> anyhow::Result<LewanSoulBus<'static>> 
 where
     U: Uart,
     UART: Peripheral<P = U> + 'static,
