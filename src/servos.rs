@@ -27,8 +27,8 @@ where
     
     let bus = LewanSoulBus::new(
         uart,
-        rx,
         tx,
+        rx,
         &config,
     )?;
 
